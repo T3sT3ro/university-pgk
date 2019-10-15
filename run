@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# This script runs the latest touched directory zN and executes an executable file inside.
+# If another 'run' script is specified inside, it launches that script instead
+
+newpwd=.
+if [[ $# -eq 0 ]]; then
+  newpwd=$(ls -tD | grep 'z.*' | head -1)
+elif test -d "$1"; then
+  newpwd=$1
+else
+  echo "invalid folder"
+  exit 1
+fi
+
+oldpwd=$PWD; cd "$newpwd" || exit
+
+if test -x "run" ; then
+  ./run
+else
+  fname=$(find . -maxdepth 1 -type f -executable | tail -1)
+  if [[ -n $fname ]]; then
+    echo launching "$newpwd/$fname"
+    ./"$fname"
+  else
+    echo no executable found in "$newpwd"
+    exit 1
+  fi
+fi
+
+cd "$oldpwd" || exit
+
