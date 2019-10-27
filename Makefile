@@ -9,7 +9,7 @@ z1-2.o: z1/tutorial02.cpp common/shader.cpp
 
 # game of lines
 2: z2/main.cpp
-	g++ $< -o z2/$@ common/shader.cpp -lGLEW -lGL -lglfw -I.
+	g++ $< -o z2/$@ common/shader.cpp z2/gameManager.cpp -lGLEW -lGL -lglfw -I.
 
 
 

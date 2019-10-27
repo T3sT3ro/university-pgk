@@ -68,7 +68,7 @@ int main( void )
 		-1.0f, -1.0f,  .0f,
 		  .0f, -1.0f,  .0f,
 		 1.0f,  1.0f,  .0f,
-		  .0f,  1.0f,  .0f,
+		  .0f,  1.0f,  .02f,
 	};
 
 	GLuint vertexbuffer;

@@ -105,6 +105,10 @@ GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path
 	glDeleteShader(VertexShaderID);
 	glDeleteShader(FragmentShaderID);
 
+	int err;
+	while((err = glGetError()) != GL_NO_ERROR){
+		fprintf(stderr, "!GL ERROR: %d\n", err);
+	}
 	return ProgramID;
 }
 

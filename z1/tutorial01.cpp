@@ -15,7 +15,7 @@ using namespace glm;
 
 int main( void )
 {
-	// Initialise GLFW
+	// Initialise GLFW2
 	if( !glfwInit() )
 	{
 		fprintf( stderr, "Failed to initialize GLFW\n" );
