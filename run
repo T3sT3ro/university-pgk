@@ -6,8 +6,10 @@
 newpwd=.
 if [[ $# -eq 0 ]]; then
   newpwd=$(ls -tD | grep 'z.*' | head -1)
-elif test -d "$1"; then
+elif test -d "$1"; then # if exists
   newpwd=$1
+elif test -d "z$1"; then
+  newpwd="z$1"
 else
   echo "invalid folder"
   exit 1
@@ -15,10 +17,10 @@ fi
 
 oldpwd=$PWD; cd "$newpwd" || exit
 
-if test -x "run" ; then
+if test -x "run" ; then # searches for custom ./run script
   ./run
 else
-  fname=$(find . -maxdepth 1 -type f -executable | tail -1)
+  fname=$(find . -maxdepth 1 -type f -executable | tail -1) # launchas first executable in dir
   if [[ -n $fname ]]; then
     echo launching "$newpwd/$fname"
     ./"$fname"

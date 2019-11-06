@@ -26,7 +26,7 @@ enum MODE { SEGMENT  = 2,
 
 class GameManager {
    private:
-    static constexpr float  radius  = .3f;
+    static constexpr float  radius  = .5f;
     static constexpr size_t CAP     = 256;  // initial endpoints capacity
     const float             epsilon = 1e-7;
 
@@ -61,6 +61,8 @@ class GameManager {
         size                      = 0;
         gameEnded                 = false;
         if (resizeCallback != nullptr) resizeCallback(endpoints);
+        VERBOSE(fprintf(stderr, "!!%d P:%d [%d %d]/%d, vert/fig<%d, %d>\n", 
+         gameEnded, player, mistakes[0], mistakes[1], maxMistakes, size, getFiguresCount()));
     }
     inline int    getFigureIdx(int i) { return i * FIGSIZE; }
     inline int    getLastFigureIdx() { return size - FIGSIZE; }  // return begining idx of last figure or < 0 if empty
