@@ -5,7 +5,7 @@
 #ifndef SHADER
 #define SHADER
 
-#include "headers/common.hpp"
+#include "common.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -16,10 +16,14 @@
 using namespace std;
 
 class Shader {
+    static GLuint currentProgID;
+
     string vertPath, fragPath;
     string vertCode, fragCode;
     GLuint vertID = 0, fragID = 0;
     GLuint progID = 0;
+
+    GLuint vao; // one vao per shader should suffice for now.
 
 public:
     Shader(string vertPath, string fragPath) : vertPath(std::move(vertPath)), fragPath(std::move(fragPath)) {}
@@ -75,14 +79,11 @@ public:
     }
 
     void use() {
-        glUseProgram(progID);
+        if(currentProgID != progID){
+            glUseProgram(progID);
+            currentProgID = progID;
+        }
     }
-
-#define setUniformContext(shader, setUniformFunction) do{\
-    GLint id; glGetIntegerv(GL_CURRENT_PROGRAM, &id); shader.use();\
-    setUniformFunction;\
-    glUseProgram(id);\
-    }while(0)
 
     virtual ~Shader() { clear(); }
 private:

@@ -5,9 +5,10 @@
 #ifndef GAMECONTROLLER
 #define GAMECONTROLLER
 
-#include "common.hpp"
+#include "headers/common.hpp"
 
 #include <vector>
+#include "GameObject.cpp"
 
 using namespace std;
 using namespace glm;
@@ -16,8 +17,8 @@ class GameController {
 public:
     class GameControllerState {
     public:
-        virtual void onEnter();
-        virtual GameControllerState* update(double dt); // if return is not null, transition occurs
+        virtual void onEnter() = 0;
+        virtual GameControllerState* update(double dt) = 0; // if return is not null, transition occurs
         GameController *gc;
         GameControllerState(GameController *gc) : gc(gc) {};
     };
@@ -43,7 +44,7 @@ public:
 
     private:
         void onEnter() override {
-            // reset pad pos and velocity
+            // reset pad position and velocity
             // reset ball and velocity
         }
 
@@ -59,12 +60,24 @@ public:
     public:
         PlayingState(GameController *gc) : GameControllerState(gc) {}
 
+        void onEnter() override {
+
+        }
+
+        GameControllerState *update(double dt) override {
+            return nullptr;
+        }
     };
 
 private:
     GLFWwindow *window;
     GameControllerState *currentState;
-
+    GameObject ball;
+    GameObject pad;
+    static const int bricksCnt = 40;
+    GameObject bricks[bricksCnt];
 };
+
+const int GameController::bricksCnt;
 
 #endif

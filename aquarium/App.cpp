@@ -2,9 +2,9 @@
 // Created by tooster on 03.11.2019.
 //
 
-#include "headers/common.hpp"
+#include "common.hpp"
 #include "Shader.cpp"
-#include "GameController.cpp"
+#include "GameController.hpp"
 
 //Shader ballShader("shaders/ball.vert", "shaders/ball.frag");
 
@@ -27,13 +27,15 @@ public:
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);  // To make MacOS happy; should not be needed
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        window = glfwCreateWindow(width, height, "Arkanoid", NULL, NULL);
+        window = glfwCreateWindow(width, height, "Aquarium", NULL, NULL);
         if (window == nullptr) CRITICAL("window not created");
         glfwMakeContextCurrent(window);
         glewExperimental = true;
         if (glewInit() != GLEW_OK) CRITICAL("GLEW not initialized");
+
         glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
         glClearColor(.3f, .3f, .3f, .3f);
+        glEnable(GL_DEPTH_TEST);
 
         gc = new GameController(window);
 
@@ -45,17 +47,11 @@ public:
         lastframe = glfwGetTime();
     }
 
-    class Brick : public GameObject{
-        Shader brickShader = Shader("shaders/brick.vert", "shaders/brick.frag");
-
-    };
-
     void run() {
         do {
-            glClear(GL_COLOR_BUFFER_BIT);
-            glfwPollEvents();
             double newframe = glfwGetTime();
             gc->update(App::deltaTime = newframe - lastframe);
+            gc->render();
             lastframe = newframe;
 
             glfwSwapBuffers(window);
@@ -70,6 +66,7 @@ int App::width, App::height;
 double App::lastframe, App::deltaTime;
 
 int main() {
+    srand(time(nullptr));
     App app(1000, 800);
     atexit([]() { glfwTerminate(); cerr.flush();});
     app.run();
