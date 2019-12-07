@@ -6,7 +6,7 @@
 #define GAMEOBJECT
 
 #include "common.hpp"
-#include "Mesh.hpp"
+#include "Shader.cpp"
 
 using namespace std;
 
@@ -39,43 +39,7 @@ struct SphereCollider {
     bool contains(const vec3 &point) const { return radius > 0 && glm::distance(point, position) <= radius; }
 };
 
-// Specifies the attributes that will be passed to current shader program;
-class ShaderProperty {
-    GLuint VAO;
-    GLuint instances;
-    Mesh   *mesh;
-    Shader *shader;
-
-    GLuint mvpVBO;
-
-public:
-    ShaderProperty(Shader *shader, Mesh *mesh, GLuint instances = 1) : shader(shader), mesh(mesh), instances(instances){
-        glCreateVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
-
-        glBindBuffer
-        glGenBuffers(1, &mvpVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, mvpVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(mat4) * instances, nullptr, GL_DYNAMIC_DRAW);
-
-        glGenBuffers(1, &idx); // indices buffer
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLushort), indices.data(), usage);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        glBindVertexArray(0);
-    }
-
-    void setMVP(GLuint instance = 0) {
-        glBindBuffer()
-    }
-
-    virtual ~ShaderProperty() {
-        delete[] mvp;
-    }
-};
+// todo: ShaderBoundProperty
 
 class GameObject {
 
@@ -85,17 +49,11 @@ public:
     SphereCollider collider;
     vec3           velocity; // normalised direction of motion
     float          speed; // scaling for velocity
-    ShaderProperty *shaderProperties;
+    Renderer       *renderer;
 
     GameObject(GLuint instance = 0) : instance(instance), velocity(0) {}
 
-
     virtual void update(float dt) {}
-
-    //
-    virtual void render() {
-
-    }
 
     virtual ~GameObject() {}
 };

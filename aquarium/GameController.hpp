@@ -45,7 +45,7 @@ public:
 
     GLFWwindow *window;
 
-    void render(Shader* shader, ShaderProperty* MBP);
+    void render(Shader* shader, Renderer* MBP);
 
 private:
     Player         player;
