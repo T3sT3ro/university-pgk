@@ -2,14 +2,17 @@
 // Created by tooster on 05.11.2019.
 //
 
-#ifndef ARKANOID_COMMON_HPP
-#define ARKANOID_COMMON_HPP
+#ifndef COMMON_HPP
+#define COMMON_HPP
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <algorithm>
+#include <iostream>
+#include <string>
 
 
 #define NDEBUG
@@ -23,6 +26,11 @@
 #define CRITICAL(x) do{std::cerr<<(x)<<std::endl; exit(-1);}while(0)
 #define BYTEPTR(ptr) ((char*)ptr)
 
+class Usable {
+public:
+    virtual void use() = 0;
+};
+
 constexpr const float EPSILON = 10e-7;
 
-#endif //ARKANOID_COMMON_HPP
+#endif //COMMON_HPP

@@ -9,8 +9,18 @@
 
 #include <vector>
 #include "GameObject.cpp"
+#include "Shader.hpp"
 
 constexpr int spheres = 50;
+
+struct Camera {
+    vec3  *position = nullptr;
+    vec3  forward = {0, 0, -1};
+    vec3  up      = {0, 1, 0};
+    float zoom    = 1; // todo
+};
+
+
 
 class Bubble : public GameObject {
 public:
@@ -19,12 +29,7 @@ public:
     void update(float dt) override;
 };
 
-struct Camera {
-    vec3  *position;
-    vec3  forward = {0, 0, -1};
-    vec3  up      = {0, 1, 0};
-    float zoom    = 1; // todo
-};
+
 
 class Player : public GameObject {
 public:
@@ -33,26 +38,30 @@ public:
     Player();
 
     void update(float dt) override;
+
+private:
+    constexpr static float angularSpeed = 1.0f;
 };
+
+
+
 
 class GameController {
 public:
     static GameController *instance;
+    GLFWwindow            *window;
 
     explicit GameController(GLFWwindow *window);
 
     void update(float dt);
 
-    GLFWwindow *window;
-
-    void render(Shader* shader, Renderer* MBP);
+    void render();
 
 private:
-    Player         player;
-    vector<Bubble> bubbles;
-    Camera         *inside, outside;
+    Player *player;
+    vector<Bubble *> bubbles;
+    Camera            *inside, *outside;
+    vector<Renderer*> renderers;
 };
-
-GameController *GameController::instance;
 
 #endif //ARKANOID_GAMECONTROLLER_HPP

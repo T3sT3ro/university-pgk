@@ -3,7 +3,6 @@
 //
 
 #include "common.hpp"
-#include "Shader.cpp"
 #include "GameController.hpp"
 
 //Shader ballShader("shaders/ball.vert", "shaders/ball.frag");
@@ -30,12 +29,12 @@ public:
         window = glfwCreateWindow(width, height, "Aquarium", NULL, NULL);
         if (window == nullptr) CRITICAL("window not created");
         glfwMakeContextCurrent(window);
-        glewExperimental = true;
+//        glewExperimental = true;
         if (glewInit() != GLEW_OK) CRITICAL("GLEW not initialized");
 
         glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
         glClearColor(.3f, .3f, .3f, .3f);
-        glEnable(GL_DEPTH_TEST);
+//        glEnable(GL_DEPTH_TEST);
 
         gc = new GameController(window);
 

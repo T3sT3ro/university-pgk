@@ -6,9 +6,10 @@
 #define GAMEOBJECT
 
 #include "common.hpp"
-#include "Shader.cpp"
+#include "Shader.hpp"
 
 using namespace std;
+using namespace glm;
 
 struct Transform3D {
     vec3 translation = {0, 0, 0};
@@ -42,6 +43,8 @@ struct SphereCollider {
 // todo: ShaderBoundProperty
 
 class GameObject {
+protected:
+    GameObject(GLuint instance = 0) : instance(instance), velocity(0) {}
 
 public:
     const GLuint   instance;
@@ -50,8 +53,6 @@ public:
     vec3           velocity; // normalised direction of motion
     float          speed; // scaling for velocity
     Renderer       *renderer;
-
-    GameObject(GLuint instance = 0) : instance(instance), velocity(0) {}
 
     virtual void update(float dt) {}
 

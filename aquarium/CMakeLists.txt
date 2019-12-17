@@ -17,4 +17,4 @@ add_executable(aquarium
         ${SOURCE_FILES}
         )
 
-#include_directories(. headers)
+include_directories(.)
