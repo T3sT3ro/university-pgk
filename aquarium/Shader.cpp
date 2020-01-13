@@ -90,14 +90,15 @@ void Shader::reload() {
     glDetachShader(progID, fragID);
 
     glDeleteShader(vertID);
-    glUseProgram(progID);
     glDeleteShader(fragID);
+    glUseProgram(progID);
 
     int VPMatricesUBOIdx = glGetUniformBlockIndex(progID, "VPMatrices");
     int LightsUBOIdx = glGetUniformBlockIndex(progID, "Lights");
     cerr << "DBG: VPM=" << VPMatricesUBOIdx << " L=" << LightsUBOIdx << endl;
-    glUniformBlockBinding(progID, VPMatricesUBOIdx, GLOB_MATRICES_BINDPOINT);
-    glUniformBlockBinding(progID, LightsUBOIdx, GLOB_LIGHTS_BINDPOINT);
+
+    glUniformBlockBinding(progID, VPMatricesUBOIdx, 0);
+    glUniformBlockBinding(progID, LightsUBOIdx, 1);
 
     cerr << "[Shader] " << getName() << " reloaded\n";
 }

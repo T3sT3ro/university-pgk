@@ -3,8 +3,6 @@
 layout(location = 0) in vec3 position;
 layout(location = 1) in mat4 modelMatrix;
 
-uniform in mat4 id;
-
 layout(std140) uniform Lights
 {
     vec4 light; // xyz is position, w is intensity
@@ -26,6 +24,6 @@ void main() {
     if(flipNormals) normal = normalize(-position);
     else normal = normalize(position);
 
-    gl_Position = id*vec4(position, 1);
+    gl_Position = viewMatrix*vec4(position, 1);
     pos = gl_Position.xyz;
 }

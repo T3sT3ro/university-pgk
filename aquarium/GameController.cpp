@@ -15,15 +15,15 @@
 
 void Camera::updateView() {
     glBindBuffer(GL_UNIFORM_BUFFER, GameController::matricesUBO);
-    glBufferSubData(GL_UNIFORM_BUFFER, offsetof(VPMatrices, viewMatrix), sizeof(mat4), value_ptr(
-            glm::perspective(glm::radians(fov), aspect, near, far)));
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(mat4), value_ptr(
+            glm::lookAt(position, forward, up)));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void Camera::updateProjection() {
     glBindBuffer(GL_UNIFORM_BUFFER, GameController::matricesUBO);
-    glBufferSubData(GL_UNIFORM_BUFFER, offsetof(VPMatrices, projectionMatrix), sizeof(mat4), value_ptr(
-            glm::lookAt(position, forward, up)));
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(mat4), sizeof(mat4), value_ptr(
+            glm::perspective(glm::radians(fov), aspect, near, far)));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
@@ -67,7 +67,9 @@ void Player::update(float dt) {
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) velocity += camera->up;
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) velocity -= camera->up;
 
-    transform.translation += velocity * dt * speed;
+    cerr << glm::to_string(velocity) << " transform: ";
+    transform.translation += velocity * dt;
+    cerr << glm::to_string(transform.translation) << endl;
     mat4 rot = glm::identity<mat4>();
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
         rot = glm::rotate(rot, angularSpeed*dt, {0,1,0});
@@ -102,6 +104,22 @@ GLuint GameController::lightsUBO;
 GameController::GameController(GLFWwindow *window) : window(window) {
     instance = this;
 
+    // initializing global matrices UBO
+    glGenBuffers(1, &matricesUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(mat4)*2, nullptr, GL_DYNAMIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, matricesUBO);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(mat4), value_ptr(mat4(1)));
+
+    // initializing global lights UBO
+    glGenBuffers(1, &lightsUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, lightsUBO);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), nullptr, GL_DYNAMIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, lightsUBO);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(vec4), value_ptr(vec4(1.0, 1.0, 0, 1)));
+
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
     camera = new Camera( {0, 0, 50});
     camera->updateView();
 
@@ -134,25 +152,6 @@ GameController::GameController(GLFWwindow *window) : window(window) {
             Shader::create("shaders/ball.vert", "shaders/ball.frag"),
             player->renderer->mesh);
 
-    // initializing global matrices UBO
-    glGenBuffers(1, &lightsUBO);
-    glGenBuffers(1, &matricesUBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(VPMatrices), nullptr, GL_DYNAMIC_DRAW);
-    glBindBufferBase(GL_UNIFORM_BUFFER, GLOB_MATRICES_BINDPOINT, matricesUBO);
-    glm::mat4 identity = glm::identity<mat4>();
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(mat4), &identity);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(mat4), sizeof(mat4), &identity);
-
-    // initializing global lights UBO
-    glBindBuffer(GL_UNIFORM_BUFFER, lightsUBO);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), nullptr, GL_DYNAMIC_DRAW);
-    glBindBufferBase(GL_UNIFORM_BUFFER, GLOB_LIGHTS_BINDPOINT, lightsUBO);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(vec4), value_ptr(vec4(0, 0, 0, 1)));
-
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    glUniformMatrix4fv(glGetUniformLocation(Shader::getCurrentShader()->getProgID(), "id"), sizeof(mat4), GL_TRUE, &identity[0][0]);
 
 }
 
