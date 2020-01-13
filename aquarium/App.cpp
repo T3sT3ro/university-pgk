@@ -36,6 +36,7 @@ public:
         glClearColor(.3f, .3f, .3f, .3f);
 //        glEnable(GL_DEPTH_TEST);
         glEnable(GL_DEPTH);
+        glEnable(GL_CULL_FACE);
 
         gc = new GameController(window);
 
