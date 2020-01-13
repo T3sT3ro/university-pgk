@@ -1,10 +1,15 @@
 #version 330 core
 
 in vec3 pos;
-out vec3 color;
+in vec3 normal;
 
+out vec3 color;
 //uniform vec3 lightPosition;
 
 void main() {
-    color = vec3(0,1,0);
+    float ambientStr = 0.1;
+    vec3 ambientColor = vec3(0.95, 0.98, 0.70);
+    vec3 objColor = vec3(.6,.3,.9);
+
+    color = (ambientStr * ambientColor + max(dot(normal, vec3(1, 1, -1)), 0.0)) * objColor;
 }

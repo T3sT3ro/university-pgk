@@ -26,11 +26,21 @@
 #define CRITICAL(x) do{std::cerr<<(x)<<std::endl; exit(-1);}while(0)
 #define BYTEPTR(ptr) ((char*)ptr)
 
+using namespace std;
+using namespace glm;
+
 class Usable {
 public:
     virtual void use() = 0;
 };
 
 constexpr const float EPSILON = 10e-7;
+constexpr const GLuint GLOB_MATRICES_BINDPOINT = 0;
+constexpr const GLuint GLOB_LIGHTS_BINDPOINT = 1;
+
+struct VPMatrices{
+    mat4 viewMatrix;
+    mat4 projectionMatrix;
+};
 
 #endif //COMMON_HPP

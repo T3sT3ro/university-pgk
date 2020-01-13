@@ -34,7 +34,7 @@ public:
          GLenum mode = GL_TRIANGLE_STRIP)
             : usage(usage), mode(mode), points(std::move(points)) {
 
-        glCreateVertexArrays(1, &vao);
+        glGenVertexArrays(1, &vao);
             glBindVertexArray(vao);
             glGenBuffers(1, &vbo);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);

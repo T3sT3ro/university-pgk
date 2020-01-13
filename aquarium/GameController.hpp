@@ -13,12 +13,28 @@
 
 constexpr int spheres = 50;
 
-struct Camera {
-    vec3  *position = nullptr;
-    vec3  forward = {0, 0, -1};
-    vec3  up      = {0, 1, 0};
-    float zoom    = 1; // todo
+/// every modification to
+class Camera {
+public:
+    // view data
+    vec3  position;
+    vec3  forward;
+    vec3  up;
+    // projection data
+    float fov    = 75.0f; // todo
+    float aspect = 4.0f/3.0f;
+    float near = 1.0f;
+    float far = 100.0f;
+
+    Camera(vec3 position = {0,0,0}, vec3 forward = {0,0,-1}, vec3 up = {0,1,0});
+
+    /// updates global view matrix
+    void updateView();
+
+    /// updates global projection matrix
+    void updateProjection();
 };
+
 
 
 
@@ -31,9 +47,10 @@ public:
 
 
 
+
 class Player : public GameObject {
 public:
-    Camera camera;
+    Camera *camera;
 
     Player();
 
@@ -41,6 +58,14 @@ public:
 
 private:
     constexpr static float angularSpeed = 1.0f;
+};
+
+
+
+
+class Aquarium : public GameObject {
+public:
+    Aquarium();
 };
 
 
@@ -56,12 +81,15 @@ public:
     void update(float dt);
 
     void render();
+    static GLuint matricesUBO;
+    static GLuint lightsUBO;
 
 private:
-    Player *player;
-    vector<Bubble *> bubbles;
-    Camera            *inside, *outside;
-    vector<Renderer*> renderers;
+    Player             *player;
+    vector<Bubble *>   bubbles;
+    Aquarium           *aquarium;
+    Camera             *camera;
+    vector<Renderer *> renderers;
 };
 
 #endif //ARKANOID_GAMECONTROLLER_HPP

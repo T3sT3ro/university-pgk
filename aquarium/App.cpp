@@ -35,6 +35,7 @@ public:
         glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
         glClearColor(.3f, .3f, .3f, .3f);
 //        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH);
 
         gc = new GameController(window);
 

@@ -12,19 +12,26 @@
 #include <fstream>
 #include <sstream>
 
-using namespace std;
-using namespace glm;
 
-Mesh* flat;
-Shader* flatShader;
-Renderer* flatRenderer;
+void Camera::updateView() {
+    glBindBuffer(GL_UNIFORM_BUFFER, GameController::matricesUBO);
+    glBufferSubData(GL_UNIFORM_BUFFER, offsetof(VPMatrices, viewMatrix), sizeof(mat4), value_ptr(
+            glm::perspective(glm::radians(fov), aspect, near, far)));
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
 
-GameController *GameController::instance;
+void Camera::updateProjection() {
+    glBindBuffer(GL_UNIFORM_BUFFER, GameController::matricesUBO);
+    glBufferSubData(GL_UNIFORM_BUFFER, offsetof(VPMatrices, projectionMatrix), sizeof(mat4), value_ptr(
+            glm::lookAt(position, forward, up)));
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
 
-GLuint vao, vbo, indices;
-vec3 v[4] {{-1,-1,0}, {1,-1,0}, {1,1,0}, {-.5f, .5f, 0}};
-GLushort i[6] {0, 2, 1, 0, 2, 3};
-
+Camera::Camera(vec3 position, vec3 forward, vec3 up)
+: position(position), forward(forward), up(up){
+    updateView();
+    updateProjection();
+}
 
 
 
@@ -44,19 +51,21 @@ void Bubble::update(float dt) {
 
 
 Player::Player() : GameObject() {
-    camera.position = &transform.translation;
+    camera = new Camera();
+    camera->position = transform.translation;
+    camera->updateView();
 }
 
 void Player::update(float dt) {
     velocity = vec3(0);
     GLFWwindow *window = GameController::instance->window;
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) velocity += camera.forward;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) velocity -= camera.forward;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) velocity += cross(camera.forward, camera.up);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) velocity -= cross(camera.forward, camera.up);
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) velocity += camera.up;
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) velocity -= camera.up;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) velocity += camera->forward;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) velocity -= camera->forward;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) velocity += cross(camera->forward, camera->up);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) velocity -= cross(camera->forward, camera->up);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) velocity += camera->up;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) velocity -= camera->up;
 
     transform.translation += velocity * dt * speed;
     mat4 rot = glm::identity<mat4>();
@@ -65,30 +74,52 @@ void Player::update(float dt) {
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
         rot = glm::rotate(rot, -angularSpeed*dt, {0,1,0});
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        rot = glm::rotate(rot, angularSpeed*dt, glm::cross(camera.forward, camera.up));
+        rot = glm::rotate(rot, angularSpeed*dt, glm::cross(camera->forward, camera->up));
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        rot = glm::rotate(rot, -angularSpeed*dt, glm::cross(camera.forward, camera.up));
-    camera.forward = rot * vec4(camera.forward, 0);
-    camera.up = rot * vec4(camera.up, 0);
+        rot = glm::rotate(rot, -angularSpeed*dt, glm::cross(camera->forward, camera->up));
+
+    camera->position = transform.translation;
+    camera->forward = rot * vec4(camera->forward, 0);
+    camera->up = rot * vec4(camera->up, 0);
+    camera->updateView();
+
 }
 
 
 
 
+Aquarium::Aquarium() {
+    // collision update to check if player inside collider
+}
+
+
+
+
+GameController *GameController::instance;
+GLuint GameController::matricesUBO;
+GLuint GameController::lightsUBO;
+
 GameController::GameController(GLFWwindow *window) : window(window) {
     instance = this;
 
+    camera = new Camera( {0, 0, 50});
+    camera->updateView();
+
     player = new Player();
     player->renderer = Renderer::create(Shader::create("shaders/ball.vert", "shaders/ball.frag"), createIcosphere());
+
     auto bubbleRenderer = Renderer::create(player->renderer->shader, player->renderer->mesh, 30);
-
-    renderers.push_back(player->renderer);
-    renderers.push_back(bubbleRenderer);
-
     for (int i = 0; i < 30; ++i) {
         Bubble * bubble = new Bubble(i);
         bubble->renderer = bubbleRenderer;
     }
+
+    aquarium = new Aquarium();
+    aquarium->renderer = Renderer::create(Shader::create("shaders/ball.vert", "shaders/ball.frag"), player->renderer->mesh);
+
+    renderers.push_back(aquarium->renderer);
+    renderers.push_back(bubbleRenderer);
+    renderers.push_back(player->renderer);
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
     glfwSetKeyCallback(window, [] (GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -99,27 +130,30 @@ GameController::GameController(GLFWwindow *window) : window(window) {
         }
     });
 
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &indices);
+    aquarium->renderer = Renderer::create(
+            Shader::create("shaders/ball.vert", "shaders/ball.frag"),
+            player->renderer->mesh);
 
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
+    // initializing global matrices UBO
+    glGenBuffers(1, &lightsUBO);
+    glGenBuffers(1, &matricesUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(VPMatrices), nullptr, GL_DYNAMIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, GLOB_MATRICES_BINDPOINT, matricesUBO);
+    glm::mat4 identity = glm::identity<mat4>();
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(mat4), &identity);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(mat4), sizeof(mat4), &identity);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(i), i, GL_STATIC_DRAW);
+    // initializing global lights UBO
+    glBindBuffer(GL_UNIFORM_BUFFER, lightsUBO);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), nullptr, GL_DYNAMIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, GLOB_LIGHTS_BINDPOINT, lightsUBO);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(vec4), value_ptr(vec4(0, 0, 0, 1)));
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, sizeof(vec3)/ sizeof(GL_FLOAT), GL_FLOAT, GL_FALSE, 0, nullptr);
-    glBindVertexArray(0);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    vector<vec3> vv(v, v+ sizeof(v)/sizeof(vec3));
-    vector<GLushort> iv(i, i+ sizeof(i)/sizeof(GLushort));
+    glUniformMatrix4fv(glGetUniformLocation(Shader::getCurrentShader()->getProgID(), "id"), sizeof(mat4), GL_TRUE, &identity[0][0]);
 
-    flat = Mesh::create(vv, iv);
-    flatShader = Shader::create("shaders/ball.vert", "shaders/ball.frag");
-    flatRenderer = Renderer::create(flatShader, flat);
 }
 
 void GameController::update(float dt) {
@@ -134,14 +168,11 @@ void GameController::update(float dt) {
 }
 
 void GameController::render() {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    aquarium->renderer->render();
 //    player->renderer->render();
 //    for(auto renderer:renderers)
 //        renderer->render();
-//    glBindVertexArray(flatRenderer->VAO);
-    glBindVertexArray(vao);
-    glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, 2);
-    flatRenderer->render();
 }
 
-#endif
+#endif //GAMECONTROLLER

@@ -25,14 +25,18 @@ public:
     // factory function
     static Shader *create(const char *vertPath, const char *fragPath);
 
+    static Shader *getCurrentShader() {return currentShader;}
+
     GLuint getProgID() const { return progID; }
     string getName() const { return vertPath.substr(0, vertPath.find_last_of("."));}
+
+    void setUniformMat4(const char* name, mat4 &mat);
+    void setUniformVec3(const char *name, vec3 &vec);
 
     /// loads and compiles/links the files
     void reload();
 
     void use() override;
-
 };
 
 #include "Mesh.hpp"
@@ -40,7 +44,6 @@ public:
 /// Specifies the attributes that will be passed to current shader program;
 /// shader must have attributes 'position' and 'mvp'
 class Renderer {
-public: // FIXME: delete
     GLuint VAO;
     const GLuint instances;
     GLuint mvpVBO;
@@ -53,7 +56,7 @@ public:
 
     static Renderer *create(Shader *shader, Mesh *mesh, GLuint instances = 1);
 
-    void setMVP(mat4 &mvp, GLuint instance = 0); // instance works with instanced rendering
+    void setModelMatrix(mat4 &modelMatrix, GLuint instance = 0); // instance works with instanced rendering
 
     void render();
 
