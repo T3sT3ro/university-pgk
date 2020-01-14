@@ -81,7 +81,7 @@ void Shader::reload() {
     //VERBOSE(CDBG << "# vert:\n" << vertCode << "\n# frag:\n" << fragCode << endl);
     glGetProgramiv(progID, GL_LINK_STATUS, &success);
     if (!success) {
-        glGetShaderInfoLog(progID, GL_INFO_LOG_LENGTH, nullptr, infolog);
+        glGetProgramInfoLog(progID, GL_INFO_LOG_LENGTH, nullptr, infolog);
         cerr << "[Shader] " << getName() << " link error: " << infolog << endl;
     }
 
@@ -95,7 +95,6 @@ void Shader::reload() {
 
     int VPMatricesUBOIdx = glGetUniformBlockIndex(progID, "VPMatrices");
     int LightsUBOIdx = glGetUniformBlockIndex(progID, "Lights");
-    cerr << "DBG: VPM=" << VPMatricesUBOIdx << " L=" << LightsUBOIdx << endl;
 
     glUniformBlockBinding(progID, VPMatricesUBOIdx, 0);
     glUniformBlockBinding(progID, LightsUBOIdx, 1);

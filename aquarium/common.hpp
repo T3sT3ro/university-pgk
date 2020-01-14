@@ -17,16 +17,26 @@
 #include <string>
 
 
-#define NDEBUG
-#ifdef NDEBUG
-#define VERBOSE(x) do{x;} while(0)
-#else
 #define VERBOSE(x) {}
+#define VERBOSE_DEBUG(x) {}
+#define VERBOSE_HIGH(x) {}
+#define VERBOSE_LOW(x) VERBOSE(x)
+
+#ifdef NDEBUG
+    #define VERBOSE(x) do{x;} while(0)
+    #if defined(VERBOSITY_LOW)
+        #define VERBOSE_LOW(x) {}
+    #endif
+    #if defined(VERBOSITY_HIGH)
+        #define VERBOSE_HIGH(x) VERBOSE(x)
+    #endif
+    #if defined(VERBOSITY_DEBUG)
+        #define VERBOSE_DEBUG(x) VERBOSE(x)
+    #endif
 #endif
 
 #define CDBG cerr << "[DEBUG]: "
 #define CRITICAL(x) do{std::cerr<<(x)<<std::endl; exit(-1);}while(0)
-#define BYTEPTR(ptr) ((char*)ptr)
 
 using namespace std;
 using namespace glm;

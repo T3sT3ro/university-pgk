@@ -67,9 +67,9 @@ void Player::update(float dt) {
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) velocity += camera->up;
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) velocity -= camera->up;
 
-    cerr << glm::to_string(velocity) << " transform: ";
+    VERBOSE_DEBUG(cerr << glm::to_string(velocity) << " transform: ");
     transform.translation += velocity * dt * speed;
-    cerr << glm::to_string(transform.translation) << endl;
+    VERBOSE_DEBUG(cerr << glm::to_string(transform.translation) << endl);
     mat4 rot = glm::identity<mat4>();
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
         rot = glm::rotate(rot, angularSpeed*dt, {0,1,0});

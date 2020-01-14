@@ -19,7 +19,7 @@ Mesh::Mesh(std::vector<vec3> &points, std::vector<GLushort> &indices, GLenum usa
     glGenBuffers(1, &idx); // indices buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLushort), indices.data(), usage);
-    VERBOSE(CDBG << "[Mesh] created: "
+    VERBOSE_LOW(CDBG << "[Mesh] created: "
                       "[pts:"<<points.size()
                     <<",idx:"<<indices.size()
                     <<",vbo:" << vbo
