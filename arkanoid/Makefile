@@ -22,5 +22,5 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(wildcard $(SRCDIR)/%.hpp)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 clean:
-	rm -f $(TARGET)
-	rm -rf obj/
+	rm -f *.o *.out
+	rm -rf obj
