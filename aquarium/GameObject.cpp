@@ -25,4 +25,4 @@ bool SphereCollider::contains(const vec3 &point) const { return radius > 0 && gl
 
 
 
-GameObject::GameObject(GLuint instance) : instance(instance), velocity(0) {}
+GameObject::GameObject(Renderer *renderer, GLuint instance) : instance(instance), renderer(renderer), velocity(0) {}

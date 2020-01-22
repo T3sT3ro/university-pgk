@@ -49,13 +49,19 @@ void Renderer::setModelMatrix(mat4 &&modelMatrix, GLuint instance) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-
 void Renderer::render(Camera* camera) {
     shader->use();
     camera->use();
 
     glBindVertexArray(VAO);
 
+    if (backfaceCulling) {
+        glEnable(GL_CULL_FACE);
+        glCullFace(cullMode);
+    } else
+        glDisable(GL_CULL_FACE);
+
+    if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glDrawElementsInstanced(mesh->mode, mesh->verticesCount, GL_UNSIGNED_SHORT, nullptr, instances);
 
     glBindVertexArray(0);

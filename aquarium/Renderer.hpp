@@ -5,10 +5,10 @@
 #ifndef PGK_RENDERER_HPP
 #define PGK_RENDERER_HPP
 
+#include <functional>
 #include "Shader.hpp"
 #include "Mesh.hpp"
 #include "Camera.hpp"
-
 
 /// Specifies the attributes that will be passed to current shader program;
 /// shader must have attributes 'position' and 'mvp'
@@ -22,6 +22,9 @@ protected:
 public:
     Shader *shader;
     Mesh   *mesh;
+    bool   backfaceCulling = true;
+    GLenum cullMode        = GL_BACK;
+    bool   wireframe       = false;
 
     static Renderer *create(Shader *shader, Mesh *mesh, GLuint instances = 1);
 

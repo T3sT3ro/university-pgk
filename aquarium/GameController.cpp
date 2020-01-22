@@ -11,21 +11,26 @@
 #include <iostream>
 
 
-Bubble::Bubble(GLuint instanceno) : GameObject(instanceno) {
+Bubble::Bubble(Renderer *renderer, GLuint instanceno) : GameObject(renderer, instanceno) {
     transform.scale *= 3.0f + (rand() % 10) / 10.0f;
-    velocity = vec3(0, (3.0f + (rand() % 10) / 10.0f), 0);
+    velocity = vec3(0, (3.0f + (rand() % 10)), 0);
 }
 
 void Bubble::update(float dt) {
     transform.translation += velocity * speed * dt;
     if (transform.translation.z > 100) transform.translation.z = 0;
+
+    renderer->setModelMatrix(transform.toModelMatrix(), instance);
+    renderer->wireframe = true;
 }
 
 
 
 
-Player::Player() : GameObject() {
+Player::Player(Renderer *renderer) : GameObject(renderer) {
     camera = new Camera(transform.translation);
+    renderer->backfaceCulling = false;
+    renderer->wireframe = true;
 }
 
 void Player::update(float dt) {
@@ -50,15 +55,24 @@ void Player::update(float dt) {
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
         rot = glm::rotate(rot, -angularSpeed*dt, normalize(cross(camera->forward, camera->up)));
 
-    camera->position = transform.translation;
+    camera->position = transform.translation - vec3(0,0,10);
     camera->forward = rot * vec4(camera->forward, 0);
     camera->up = rot * vec4(camera->up, 0);
+
+    renderer->setModelMatrix(transform.toModelMatrix());
 }
 
 
 
 
 void Aquarium::update(float ) {}
+
+Aquarium::Aquarium(Renderer *renderer) : GameObject(renderer) {
+    transform.scale *= 10;
+//    renderer->cullMode = GL_FRONT;
+    renderer->backfaceCulling = false;
+    renderer->wireframe = true;
+}
 
 
 GameController *GameController::instance;
@@ -72,7 +86,6 @@ GameController::GameController(GLFWwindow *window) : window(window) {
     glClearColor(.3f, .3f, .3f, .3f);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_DEPTH);
-//    glEnable(GL_CULL_FACE);
 
     // initializing global matrices UBO
     glGenBuffers(1, &matricesUBO);
@@ -90,31 +103,31 @@ GameController::GameController(GLFWwindow *window) : window(window) {
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    player = new Player();
-    player->transform.translation = {0, 0, -20};
+    Mesh* icosphere = Mesh::import("models/icosphere.obj");
+    Mesh* suzanne = Mesh::import("models/suzanne.obj");
+    Shader* ballShader = Shader::create("shaders/ball.vert", "shaders/ball.frag");
+
+    player = new Player(Renderer::create(ballShader, suzanne));
+    player->transform.translation = {0, 0, -10};
     camera = player->camera;
 
-    Mesh* icosphere = Mesh::import("icosphere.obj");
-//    player->renderer = Renderer::create(Shader::create("shaders/ball.vert", "shaders/ball.frag"), icosphere);
 
-//    auto bubbleRenderer = Renderer::create(player->renderer->shader, player->renderer->mesh, 30);
-//    for (int i = 0; i < 30; ++i) {
-//        Bubble * bubble = new Bubble(i);
-//        bubble->renderer = bubbleRenderer;
-//    }
+    auto bubbleRenderer = Renderer::create(ballShader, icosphere, spheres);
+    for (int i = 0; i < spheres; ++i) bubbles.push_back(new Bubble(bubbleRenderer, i));
 
-    aquarium = new Aquarium();
-    aquarium->renderer = Renderer::create(Shader::create("shaders/ball.vert", "shaders/ball.frag"), icosphere);
 
-    renderers.push_back(aquarium->renderer);
-//    renderers.push_back(bubbleRenderer);
-//    renderers.push_back(player->renderer);
+    aquarium = new Aquarium(Renderer::create(Shader::create("shaders/aquarium.vert", "shaders/aquarium.frag"), icosphere));
+    aquarium->renderer->setModelMatrix(aquarium->transform.toModelMatrix());
+
+    renderQueue.push_back(aquarium->renderer);
+    renderQueue.push_back(player->renderer);
+//    renderQueue.push_back(bubbleRenderer);
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
     glfwSetKeyCallback(window, [] (GLFWwindow* , int key, int , int action, int ) {
         if(key == GLFW_KEY_R && action == GLFW_PRESS){
             cerr << "Reloading...\n";
-            for(auto renderer : GameController::instance->renderers)
+            for(auto renderer : GameController::instance->renderQueue)
                 renderer->shader->reload();
         }
     });
@@ -134,12 +147,8 @@ void GameController::update(float dt) {
 
 void GameController::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-//    aquarium->renderer->setModelMatrix(aquarium->transform.toModelMatrix());
-    aquarium->renderer->render(camera);
-//    player->renderer->render();
-//    for(auto renderer:renderers)
-//        renderer->render();
+    for(auto renderer:renderQueue)
+        renderer->render(camera);
 }
 
 #endif //GAMECONTROLLER

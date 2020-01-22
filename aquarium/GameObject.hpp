@@ -40,15 +40,15 @@ struct SphereCollider {
 
 class GameObject {
 protected:
-    explicit GameObject(GLuint instance = 0);
+    explicit GameObject(Renderer *renderer, GLuint instance = 0);
 
 public:
     const GLuint   instance;
+    Renderer       *renderer;
     Transform3D    transform; // pointer to transform so all transforms can be put inside one
     SphereCollider collider;
     vec3           velocity; // normalised direction of motion
     float          speed; // scaling for velocity
-    Renderer       *renderer{};
 
     virtual void update(float) = 0;
 

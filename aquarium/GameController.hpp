@@ -13,12 +13,12 @@
 #include "Camera.hpp"
 #include "Renderer.hpp"
 
-constexpr int spheres = 50;
+constexpr int spheres = 1;
 
 
 class Bubble : public GameObject {
 public:
-    explicit Bubble(GLuint instanceno);
+    explicit Bubble(Renderer *renderer, GLuint instanceno);
 
     void update(float dt) override;
 };
@@ -30,7 +30,7 @@ class Player : public GameObject {
 public:
     Camera *camera;
 
-    Player();
+    explicit Player(Renderer *renderer);
 
     void update(float dt) override;
 
@@ -44,7 +44,7 @@ private:
 
 class Aquarium : public GameObject {
 public:
-    Aquarium() = default;
+    explicit Aquarium(Renderer* renderer);
 
     void update(float d) override;
 };
@@ -70,7 +70,7 @@ private:
     vector<Bubble *>   bubbles;
     Aquarium           *aquarium;
     Camera             *camera;
-    vector<Renderer *> renderers;
+    vector<Renderer *> renderQueue;
 };
 
 #endif //ARKANOID_GAMECONTROLLER_HPP

@@ -89,7 +89,7 @@ Mesh *Mesh::import(const char *objPath, GLenum usage, GLenum mode) {
                     }
                 }
             } else if(!line.empty()){
-                VERBOSE_LOW(cerr << "[Mesh] unrecognized line:" << lineNO << ": '" << line << "' in " << objPath << endl);
+                VERBOSE_LOW(cerr << "[Mesh] unrecognized line " << objPath <<  ":" << lineNO <<":\t'" << line << "'" << endl);
             }
         }
         objFile.close();
