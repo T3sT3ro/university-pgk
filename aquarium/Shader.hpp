@@ -9,7 +9,7 @@
 
 using namespace std;
 
-class Shader : public Usable {
+class Shader {
     static Shader *currentShader;
 
     GLuint progID = 0;
@@ -28,7 +28,7 @@ public:
     static Shader *getCurrentShader() {return currentShader;}
 
     GLuint getProgID() const { return progID; }
-    string getName() const { return vertPath.substr(0, vertPath.find_last_of("."));}
+    string getName() const { return vertPath.substr(0, vertPath.find_last_of('.'));}
 
     void setUniformMat4(const char* name, mat4 &mat);
     void setUniformVec3(const char *name, vec3 &vec);
@@ -36,31 +36,6 @@ public:
     /// loads and compiles/links the files
     void reload();
 
-    void use() override;
+    void use();
 };
-
-#include "Mesh.hpp"
-
-/// Specifies the attributes that will be passed to current shader program;
-/// shader must have attributes 'position' and 'mvp'
-class Renderer {
-    GLuint VAO;
-    const GLuint instances;
-    GLuint mvpVBO;
-protected:
-    Renderer(Shader *shader, Mesh *mesh, GLuint instances);
-
-public:
-    Shader *shader;
-    Mesh   *mesh;
-
-    static Renderer *create(Shader *shader, Mesh *mesh, GLuint instances = 1);
-
-    void setModelMatrix(mat4 &modelMatrix, GLuint instance = 0); // instance works with instanced rendering
-
-    void render();
-
-    virtual ~Renderer();
-};
-
 #endif //SHADER_HPP

@@ -12,10 +12,10 @@ void windowResizeHandler(GLFWwindow *, int, int);
 class App {
     static GLFWwindow *window;
     static int width, height;
-    static double lastframe;
+    static float lastframe;
 public:
     GameController *gc = nullptr;
-    static double deltaTime;
+    static float deltaTime;
 
     App(int width, int height) {
         App::width = width;
@@ -32,15 +32,9 @@ public:
 //        glewExperimental = true;
         if (glewInit() != GLEW_OK) CRITICAL("GLEW not initialized");
 
-        glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-        glClearColor(.3f, .3f, .3f, .3f);
-//        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_DEPTH);
-        glEnable(GL_CULL_FACE);
-
         gc = new GameController(window);
 
-        glfwSetWindowSizeCallback(window, [](GLFWwindow *window, int w, int h) {
+        glfwSetWindowSizeCallback(window, [](GLFWwindow *, int w, int h) {
             App::width = w;
             App::height = h;
             glViewport(0, 0, w, h);
@@ -64,7 +58,7 @@ public:
 
 GLFWwindow* App::window;
 int App::width, App::height;
-double App::lastframe, App::deltaTime;
+float App::lastframe, App::deltaTime;
 
 int main() {
     srand(time(nullptr));

@@ -8,34 +8,12 @@
 #include "common.hpp"
 
 #include <vector>
-#include "GameObject.cpp"
+#include "GameObject.hpp"
 #include "Shader.hpp"
+#include "Camera.hpp"
+#include "Renderer.hpp"
 
 constexpr int spheres = 50;
-
-/// every modification to
-class Camera {
-public:
-    // view data
-    vec3  position;
-    vec3  forward;
-    vec3  up;
-    // projection data
-    float fov    = 75.0f; // todo
-    float aspect = 4.0f/3.0f;
-    float near = 1.0f;
-    float far = 100.0f;
-
-    Camera(vec3 position = {0,0,0}, vec3 forward = {0,0,-1}, vec3 up = {0,1,0});
-
-    /// updates global view matrix
-    void updateView();
-
-    /// updates global projection matrix
-    void updateProjection();
-};
-
-
 
 
 class Bubble : public GameObject {
@@ -57,8 +35,8 @@ public:
     void update(float dt) override;
 
 private:
-    constexpr static float angularSpeed = 1.0f;
-    constexpr static float speed = 1.0f;
+    constexpr static float angularSpeed = 1.5f;
+    constexpr static float speed = 2.0f;
 };
 
 
@@ -66,7 +44,9 @@ private:
 
 class Aquarium : public GameObject {
 public:
-    Aquarium();
+    Aquarium() = default;
+
+    void update(float d) override;
 };
 
 

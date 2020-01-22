@@ -6,7 +6,6 @@
 #include <fstream>
 #include <sstream>
 
-//  region Shader
 Shader *Shader::currentShader = nullptr;
 
 Shader::Shader(const char *vertPath, const char *fragPath) : vertPath(vertPath), fragPath(fragPath) {
@@ -114,73 +113,3 @@ Shader::~Shader() {
     glDeleteProgram(progID);
     if (currentShader == this) currentShader = nullptr;
 }
-
-//endregion Shader
-
-
-
-
-//region Renderer
-/// Specifies the attributes that will be passed to current shader program;
-/// shader must have attributes 'position' and 'mvp'
-Renderer::Renderer(Shader *shader, Mesh *mesh, GLuint instances)
-        : shader(shader), mesh(mesh), instances(instances) {
-
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    mesh->use();
-
-    GLuint posAttrib = glGetAttribLocation(shader->getProgID(), "position");
-    if (posAttrib == (GLuint) -1)
-        cerr << "[Renderer] " << shader->getName() << " `position` attribute missing (maybe optimized-out)\n";
-    else {
-        glEnableVertexAttribArray(posAttrib);
-        glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        if (instances > 1) glVertexAttribDivisor(posAttrib, 1);
-    }
-
-    GLuint mvpAttrib = glGetAttribLocation(shader->getProgID(), "modelMatrix");
-    if (mvpAttrib == (GLuint) -1)
-        cout << "[Renderer] " << shader->getName() << " `modelMatrix` attribute missing (maybe optimized-out)\n";
-    else {
-        auto identity = mat4(1);
-        glGenBuffers(1, &mvpVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, mvpVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(mat4) * instances, &identity[0][0], GL_DYNAMIC_DRAW);
-        for (size_t i = 0; i < 4; ++i) {
-            glEnableVertexAttribArray(mvpAttrib + i);
-            glVertexAttribPointer(mvpAttrib + i, 4, GL_FLOAT, GL_FALSE,
-                                  /*instances == 1 ? 0 : */4,
-                                  /*instances == 1 ? nullptr : */(const GLvoid *) (sizeof(GLfloat) * 4 * i));
-            if (instances > 1) glVertexAttribDivisor(mvpAttrib + i, 1);
-        }
-    }
-
-    glBindVertexArray(0);
-    cerr.flush();
-}
-
-Renderer *Renderer::create(Shader *shader, Mesh *mesh, GLuint instances) {
-    return new Renderer(shader, mesh, instances);
-}
-
-// sets the MVP, and if instance is specified it is done for that instance
-void Renderer::setModelMatrix(mat4 &modelMatrix, GLuint instance) {
-    glBindBuffer(GL_ARRAY_BUFFER, mvpVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, sizeof(mat4) * instance, sizeof(mat4), &modelMatrix);
-}
-
-void Renderer::render() {
-    shader->use();
-    glBindVertexArray(VAO);
-//    CDBG << mesh->indices.size() <<" "<< instances << "\n";
-    glDrawElementsInstanced(mesh->mode, mesh->indices.size(), GL_UNSIGNED_SHORT, nullptr, instances);
-    glBindVertexArray(0);
-}
-
-Renderer::~Renderer() {
-    glDeleteBuffers(1, &mvpVBO);
-    glDeleteVertexArrays(1, &VAO);
-}
-//endregion Renderer

@@ -24,6 +24,6 @@ void main() {
     if(flipNormals) normal = normalize(-position);
     else normal = normalize(position);
 
-    gl_Position = viewMatrix*vec4(position, 1);
+    gl_Position = projectionMatrix*viewMatrix*modelMatrix*vec4(position, 1);
     pos = gl_Position.xyz;
 }
