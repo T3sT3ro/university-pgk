@@ -14,6 +14,7 @@
 Bubble::Bubble(Renderer *renderer, GLuint instanceno) : GameObject(renderer, instanceno) {
     transform.scale *= 3.0f + (rand() % 10) / 10.0f;
     velocity = vec3(0, (3.0f + (rand() % 10)), 0);
+    transform.translation.x = instanceno * 5;
 }
 
 void Bubble::update(float dt) {
@@ -21,7 +22,7 @@ void Bubble::update(float dt) {
     if (transform.translation.z > 100) transform.translation.z = 0;
 
     renderer->setModelMatrix(transform.toModelMatrix(), instance);
-    renderer->wireframe = true;
+    renderer->wireframe = false;
 }
 
 
@@ -29,8 +30,8 @@ void Bubble::update(float dt) {
 
 Player::Player(Renderer *renderer) : GameObject(renderer) {
     camera = new Camera(transform.translation);
-    renderer->backfaceCulling = false;
-    renderer->wireframe = true;
+    renderer->backfaceCulling = true;
+    renderer->wireframe = false;
 }
 
 void Player::update(float dt) {
@@ -55,9 +56,9 @@ void Player::update(float dt) {
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
         rot = glm::rotate(rot, -angularSpeed*dt, normalize(cross(camera->forward, camera->up)));
 
-    camera->position = transform.translation - vec3(0,0,10);
     camera->forward = rot * vec4(camera->forward, 0);
     camera->up = rot * vec4(camera->up, 0);
+    camera->position = transform.translation - camera->forward*4.0f + camera->up;
 
     renderer->setModelMatrix(transform.toModelMatrix());
 }
@@ -68,16 +69,18 @@ void Player::update(float dt) {
 void Aquarium::update(float ) {}
 
 Aquarium::Aquarium(Renderer *renderer) : GameObject(renderer) {
-    transform.scale *= 10;
-//    renderer->cullMode = GL_FRONT;
+    transform.scale *= 50;
+    renderer->cullMode = GL_BACK;
     renderer->backfaceCulling = false;
     renderer->wireframe = true;
+    renderer->shader->setUniformFloat("FAR", GameController::camera->far);
 }
 
 
 GameController *GameController::instance;
 GLuint GameController::matricesUBO;
 GLuint GameController::lightsUBO;
+Camera *GameController::camera;
 
 GameController::GameController(GLFWwindow *window) : window(window) {
     instance = this;
@@ -104,10 +107,10 @@ GameController::GameController(GLFWwindow *window) : window(window) {
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     Mesh* icosphere = Mesh::import("models/icosphere.obj");
-    Mesh* suzanne = Mesh::import("models/suzanne.obj");
+//    Mesh* suzanne = Mesh::import("models/suzanne.obj");
     Shader* ballShader = Shader::create("shaders/ball.vert", "shaders/ball.frag");
 
-    player = new Player(Renderer::create(ballShader, suzanne));
+    player = new Player(Renderer::create(ballShader, icosphere));
     player->transform.translation = {0, 0, -10};
     camera = player->camera;
 
@@ -121,7 +124,7 @@ GameController::GameController(GLFWwindow *window) : window(window) {
 
     renderQueue.push_back(aquarium->renderer);
     renderQueue.push_back(player->renderer);
-//    renderQueue.push_back(bubbleRenderer);
+    renderQueue.push_back(bubbleRenderer);
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
     glfwSetKeyCallback(window, [] (GLFWwindow* , int key, int , int action, int ) {

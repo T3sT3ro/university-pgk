@@ -15,6 +15,9 @@ class Shader {
     GLuint progID = 0;
     string vertPath, fragPath;
 
+    GLint fetchUniform(const char* name);
+    void  saveBeforeReload();
+    void  restoreAfterReload();
 protected:
     Shader(const char *vertPath, const char *fragPath);
 
@@ -30,8 +33,9 @@ public:
     GLuint getProgID() const { return progID; }
     string getName() const { return vertPath.substr(0, vertPath.find_last_of('.'));}
 
-    void setUniformMat4(const char* name, mat4 &mat);
+    void setUniformMat4(const char *name, mat4 &mat);
     void setUniformVec3(const char *name, vec3 &vec);
+    void setUniformFloat(const char *name, float &value);
 
     /// loads and compiles/links the files
     void reload();

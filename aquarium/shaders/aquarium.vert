@@ -8,6 +8,10 @@ layout(std140) uniform VPMatrices
     mat4 projectionMatrix;
 };
 
+uniform float FAR;
+out float DEPTH;
+
 void main() {
     gl_Position = projectionMatrix*viewMatrix*modelMatrix*vec4(position, 1);
+    DEPTH = gl_Position.z / FAR;
 }

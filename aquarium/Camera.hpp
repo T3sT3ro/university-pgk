@@ -21,7 +21,7 @@ public:
     float fov    = 75.0f,
           aspect = 4.0f / 3.0f,
           near   = 0.1f,
-          far    = 100.0f;
+          far    = 1000.0f;
 
     explicit Camera(vec3 position, vec3 forward = {0,0,1}, vec3 up = {0,1,0});
 

@@ -61,7 +61,10 @@ void Renderer::render(Camera* camera) {
     } else
         glDisable(GL_CULL_FACE);
 
-    if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if (wireframe)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    else
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawElementsInstanced(mesh->mode, mesh->verticesCount, GL_UNSIGNED_SHORT, nullptr, instances);
 
     glBindVertexArray(0);

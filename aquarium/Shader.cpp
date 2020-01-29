@@ -17,14 +17,24 @@ Shader *Shader::create(const char *vertPath, const char *fragPath) {
     return new Shader(vertPath, fragPath);
 }
 
-void Shader::setUniformMat4(const char *name, mat4 &mat) {
+GLint Shader::fetchUniform(const char *name) {
     this->use();
-    glUniformMatrix4fv(glGetUniformLocation(progID, name), 1, GL_FALSE, &mat[0][0]);
+    GLint loc = glGetUniformLocation(progID, name);
+    if(loc == -1)
+        cerr << "[Shader] " << getName() << " cannot find uniform " << name << endl;
+    return loc;
+}
+
+void Shader::setUniformMat4(const char *name, mat4 &mat) {
+    glUniformMatrix4fv(fetchUniform(name), 1, GL_FALSE, &mat[0][0]);
 }
 
 void Shader::setUniformVec3(const char *name, vec3 &vec){
-    this->use();
-    glUniform3fv(glGetUniformLocation(progID, name), 1, &vec[0]);
+    glUniform3fv(fetchUniform(name), 1, &vec[0]);
+}
+
+void Shader::setUniformFloat(const char *name, float &value) {
+    glUniform1f(fetchUniform(name), value);
 }
 
 /// loads and compiles and links
@@ -112,4 +122,29 @@ void Shader::use() {
 Shader::~Shader() {
     glDeleteProgram(progID);
     if (currentShader == this) currentShader = nullptr;
+}
+
+void Shader::saveBeforeReload() {
+    GLint i;
+    GLint count;
+
+    GLint size; // variable size
+    GLenum type; // type of variable
+
+    GLchar name[64]; // name of variable in GLSL
+    GLsizei length; //name length
+
+    glGetProgramiv(progID, GL_ACTIVE_ATTRIBUTES, &count);
+    printf("Active Attributes: %d\n", count);
+
+    for (i = 0; i < count; i++)
+    {
+        glGetActiveAttrib(progID, (GLuint)i, sizeof(name), &length, &size, &type, name);
+
+        printf("Attribute #%d Type: %u Name: %s\n", i, type, name);
+    }
+}
+
+void Shader::restoreAfterReload() {
+
 }

@@ -56,6 +56,7 @@ class GameController {
 public:
     static GameController *instance;
     GLFWwindow            *window;
+    static Camera         *camera;
 
     explicit GameController(GLFWwindow *window);
 
@@ -69,7 +70,6 @@ private:
     Player             *player;
     vector<Bubble *>   bubbles;
     Aquarium           *aquarium;
-    Camera             *camera;
     vector<Renderer *> renderQueue;
 };
 
