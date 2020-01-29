@@ -65,7 +65,7 @@ public:
     void render();
     static GLuint matricesUBO;
     static GLuint lightsUBO;
-
+    static char* meshPath, *vertPath, *fragPath, *texPath;
 private:
     Player             *player;
     vector<Bubble *>   bubbles;

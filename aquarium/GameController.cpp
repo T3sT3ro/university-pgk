@@ -31,8 +31,8 @@ void Bubble::update(float dt) {
 
 Player::Player(Renderer *renderer) : GameObject(renderer) {
     camera = new Camera(transform.translation);
-    renderer->backfaceCulling = true;
-    renderer->wireframe = false;
+    renderer->backfaceCulling = false;
+    renderer->wireframe = true;
 }
 
 void Player::update(float dt) {
@@ -73,6 +73,7 @@ void Player::update(float dt) {
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(vec4), value_ptr(vec4(transform.translation, 1)));
 }
 
+char* GameController::meshPath, *GameController::vertPath, *GameController::fragPath, *GameController::texPath;
 
 
 
@@ -80,7 +81,7 @@ void Aquarium::update(float ) {}
 
 Aquarium::Aquarium(Renderer *renderer) : GameObject(renderer) {
     transform.scale *= 5;
-    renderer->cullMode = GL_FRONT;
+    renderer->cullMode = GL_BACK;
     renderer->backfaceCulling = true;
     renderer->wireframe = false;
     renderer->shader->setUniformFloat("FAR", GameController::camera->far);
@@ -116,11 +117,15 @@ GameController::GameController(GLFWwindow *window) : window(window) {
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+    Mesh* importedMesh = Mesh::import(meshPath);
+    Shader* importedShdr = Shader::create(vertPath, fragPath);
+    Texture* importedTex = Texture::import(texPath);
+
     Mesh* icosphere = Mesh::import("models/icosphere.obj");
-//    Mesh* suzanne = Mesh::import("models/suzanne.obj");
+    Mesh* suzanne = Mesh::import("models/suzanne.obj");
     Shader* ballShader = Shader::create("shaders/ball.vert", "shaders/ball.frag");
 
-    player = new Player(Renderer::create(ballShader, icosphere));
+    player = new Player(Renderer::create(ballShader, suzanne));
     player->transform.translation = {0, 0, -10};
     camera = player->camera;
 
@@ -129,9 +134,9 @@ GameController::GameController(GLFWwindow *window) : window(window) {
     for (int i = 0; i < spheres; ++i) bubbles.push_back(new Bubble(bubbleRenderer, i));
 
 
-    aquarium = new Aquarium(Renderer::create(Shader::create("shaders/aquarium.vert", "shaders/aquarium.frag"), icosphere));
+    aquarium = new Aquarium(Renderer::create(importedShdr, importedMesh));//"shaders/aquarium.vert", "shaders/aquarium.frag"), icosphere));
     aquarium->renderer->setModelMatrix(aquarium->transform.toModelMatrix());
-    aquarium->renderer->texture = Texture::import("textures/normal.jpg");
+    aquarium->renderer->texture = importedTex;//Texture::import("textures/normal.jpg");
 
     renderQueue.push_back(aquarium->renderer);
 //    renderQueue.push_back(player->renderer);

@@ -60,8 +60,17 @@ GLFWwindow* App::window;
 int App::width, App::height;
 float App::lastframe, App::deltaTime;
 
-int main() {
+int main(int argc, char* argv[]) {
     srand(time(nullptr));
+    if(argc < 5){
+        cerr << "args: modelPath, vertPath, fragPath, [texturePath]" << endl;
+        exit(0);
+    } else {
+        GameController::meshPath=argv[1];
+        GameController::vertPath=argv[2];
+        GameController::fragPath=argv[3];
+        GameController::texPath= const_cast<char *>(argc >= 5 ? argv[4] : "");
+    }
     App app(1000, 800);
     atexit([]() { glfwTerminate(); cerr.flush();});
     app.run();
