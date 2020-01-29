@@ -9,6 +9,7 @@
 #include "Shader.hpp"
 #include "Mesh.hpp"
 #include "Camera.hpp"
+#include "Texture.hpp"
 
 /// Specifies the attributes that will be passed to current shader program;
 /// shader must have attributes 'position' and 'mvp'
@@ -20,8 +21,10 @@ protected:
     Renderer(Shader *shader, Mesh *mesh, GLuint instances);
 
 public:
-    Shader *shader;
-    Mesh   *mesh;
+    Shader  *shader         = nullptr;
+    Mesh    *mesh           = nullptr;
+    Texture *texture        = nullptr;
+
     bool   backfaceCulling = true;
     GLenum cullMode        = GL_BACK;
     bool   wireframe       = false;

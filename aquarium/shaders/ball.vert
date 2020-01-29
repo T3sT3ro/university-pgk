@@ -13,6 +13,7 @@ out vec3 normal;
 out vec3 pos;
 
 void main() {
+    normal = normalize(position.xyz); // normal for ball is along radius
     gl_Position = projectionMatrix*viewMatrix*modelMatrix*vec4(position, 1);
     pos = gl_Position.xyz;
 }

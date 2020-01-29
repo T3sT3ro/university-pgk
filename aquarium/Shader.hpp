@@ -16,8 +16,6 @@ class Shader {
     string vertPath, fragPath;
 
     GLint fetchUniform(const char* name);
-    void  saveBeforeReload();
-    void  restoreAfterReload();
 protected:
     Shader(const char *vertPath, const char *fragPath);
 

@@ -50,12 +50,12 @@ Mesh *Mesh::import(const char *objPath, GLenum usage, GLenum mode) {
                 rawVertices.emplace_back(x, y, z);
             } else if (what == "vt") { // if UVs are not present, they are ignored
                 mesh->hasUVs = true;
-                GLushort u, v;
+                float u, v;
                 ss >> u >> v;
                 rawUVs.emplace_back(u, v);
             } else if (what == "vn") { /// if normals are not present, they are ignored
                 mesh->hasNormals = true;
-                GLushort x, y, z;
+                float x, y, z;
                 ss >> x >> y >> z;
                 rawNormals.emplace_back(x, y, z);
             } else if (what == "f") {

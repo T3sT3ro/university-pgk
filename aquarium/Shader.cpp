@@ -124,27 +124,6 @@ Shader::~Shader() {
     if (currentShader == this) currentShader = nullptr;
 }
 
-void Shader::saveBeforeReload() {
-    GLint i;
-    GLint count;
+struct savedUniforms{
 
-    GLint size; // variable size
-    GLenum type; // type of variable
-
-    GLchar name[64]; // name of variable in GLSL
-    GLsizei length; //name length
-
-    glGetProgramiv(progID, GL_ACTIVE_ATTRIBUTES, &count);
-    printf("Active Attributes: %d\n", count);
-
-    for (i = 0; i < count; i++)
-    {
-        glGetActiveAttrib(progID, (GLuint)i, sizeof(name), &length, &size, &type, name);
-
-        printf("Attribute #%d Type: %u Name: %s\n", i, type, name);
-    }
-}
-
-void Shader::restoreAfterReload() {
-
-}
+};

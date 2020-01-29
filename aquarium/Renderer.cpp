@@ -52,6 +52,7 @@ void Renderer::setModelMatrix(mat4 &&modelMatrix, GLuint instance) {
 void Renderer::render(Camera* camera) {
     shader->use();
     camera->use();
+    if(texture) texture->use(); // use default texture instead (0) ???
 
     glBindVertexArray(VAO);
 

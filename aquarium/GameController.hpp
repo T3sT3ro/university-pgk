@@ -36,7 +36,7 @@ public:
 
 private:
     constexpr static float angularSpeed = 1.5f;
-    constexpr static float speed = 2.0f;
+    constexpr static float speed = 3.0f;
 };
 
 
