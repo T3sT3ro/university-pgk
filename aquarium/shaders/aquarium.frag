@@ -61,21 +61,21 @@ void main() {
     vec3 diffuse = max(dot(norm, lightDir), 0.0)*lightColor;
 
     vec3 result = texture(ourTexture, TexCoord).xyz; //(ambient+diffuse)*objColor;
-    color = result; //mix(result, vec3(.4,.16,.25), DEPTH*10);
-//// -----
-//    vec2 st = gl_FragCoord.xy/u_resolution.xy;
-//    st.y *= u_resolution.y/u_resolution.x;
-//
-//    vec2 pos = st.yx*vec2(10.,3.);
-//
-//    float pattern = pos.x;
-//
-//    // Add noise
-//    pos = rotate2d( noise(pos) ) * pos;
-//
-//    // Draw lines
-//    pattern = lines(pos,.5);
-//
-//    color = vec4(vec3(pattern),1.0).xyz;
-//// ----
+//    color = result; //mix(result, vec3(.4,.16,.25), DEPTH*10);
+// -----
+    vec2 st = gl_FragCoord.xy/u_resolution.xy;
+    st.y *= u_resolution.y/u_resolution.x;
+
+    vec2 pos = st.yx*vec2(10.,3.);
+
+    float pattern = pos.x;
+
+    // Add noise
+    pos = rotate2d( noise(pos) ) * pos;
+
+    // Draw lines
+    pattern = lines(pos,.5);
+
+    color = vec4(vec3(pattern),1.0).xyz;
+// ----
 }
