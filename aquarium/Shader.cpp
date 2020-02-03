@@ -102,11 +102,9 @@ void Shader::reload() {
     glDeleteShader(fragID);
     glUseProgram(progID);
 
-    int VPMatricesUBOIdx = glGetUniformBlockIndex(progID, "VPMatrices");
-    int LightsUBOIdx = glGetUniformBlockIndex(progID, "Lights");
+    int GlobalsUBOIdx = glGetUniformBlockIndex(progID, "globals");
 
-    glUniformBlockBinding(progID, VPMatricesUBOIdx, 0);
-    glUniformBlockBinding(progID, LightsUBOIdx, 1);
+    glUniformBlockBinding(progID, GlobalsUBOIdx, 0);
 
     cerr << "[Shader] " << getName() << " reloaded\n";
 }
@@ -123,7 +121,3 @@ Shader::~Shader() {
     glDeleteProgram(progID);
     if (currentShader == this) currentShader = nullptr;
 }
-
-struct savedUniforms{
-
-};

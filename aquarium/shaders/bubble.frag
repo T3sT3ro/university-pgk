@@ -19,9 +19,9 @@ out vec4 color;
 
 vec3 ambientColor = vec3(.72,1,.96); // yellow-ish
 vec3 objColor = vec3(.2,.4,.6); // feint-dark-blue-ish
-vec3 lightColor = vec3(.8,.8,.2); // crimson-red
+vec3 lightColor = vec3(.8,.8,.2);
 vec3 fadeout = vec3(.29,.4,.55); // color of fadeout for faraway objects
-float lightPower = 50.0f;
+float lightPower = 10.0f;
 
 void main() {
 
@@ -36,7 +36,7 @@ void main() {
 
     color =
     mix(
-    vec4(objColor*(ambientColor * .4 + ((lightColor * lightPower/2*cosTheta + lightColor*lightPower * pow(cosAlpha,32)))/pow(distance, 2)), 1)
+    vec4(objColor*(ambientColor * .4 + ((lightColor * lightPower*cosTheta + lightColor*lightPower * pow(cosAlpha,4)))/pow(distance, 2)), 1)
     , vec4(fadeout, .3), clamp(DEPTH*20, 0, 1))
     ;
 }

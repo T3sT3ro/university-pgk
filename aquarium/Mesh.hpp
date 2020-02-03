@@ -22,9 +22,10 @@ class Mesh{
 
     bool hasUVs     = false;
     bool hasNormals = false;
+    const char* filePath;
 
 protected:
-    Mesh(GLenum usage, GLenum mode);
+    Mesh(const char* path, GLenum usage, GLenum mode);
 
     struct Vertex{
         vec3 position;

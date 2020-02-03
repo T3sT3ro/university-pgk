@@ -45,7 +45,7 @@ public:
     void run() {
         do {
             double newframe = glfwGetTime();
-            gc->update(App::deltaTime = newframe - lastframe);
+            gc->update((App::deltaTime = newframe - lastframe));
             gc->render();
             lastframe = newframe;
 

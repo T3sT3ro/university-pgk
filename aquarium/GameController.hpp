@@ -13,11 +13,12 @@
 #include "Camera.hpp"
 #include "Renderer.hpp"
 
-constexpr int spheres = 1;
-
+const float aquariumRadius = 25.0f;
 
 class Bubble : public GameObject {
 public:
+    SphereCollider collider;
+
     explicit Bubble(Renderer *renderer, GLuint instanceno);
 
     void update(float dt) override;
@@ -29,14 +30,15 @@ public:
 class Player : public GameObject {
 public:
     Camera *camera;
+    SphereCollider collider;
 
     explicit Player(Renderer *renderer);
 
     void update(float dt) override;
 
 private:
-    constexpr static float angularSpeed = 1.5f;
-    constexpr static float speed = 3.0f;
+    float angularSpeed = 1.5f;
+    float speed = 3.0f;
 };
 
 
@@ -57,20 +59,26 @@ public:
     static GameController *instance;
     GLFWwindow            *window;
     static Camera         *camera;
+    static float          timescale;
+
 
     explicit GameController(GLFWwindow *window);
 
     void update(float dt);
 
     void render();
-    static GLuint matricesUBO;
-    static GLuint lightsUBO;
+    static GLuint globalsUBO;
+
+    void nextLevel();
 
 private:
     Player             *player;
     vector<Bubble *>   bubbles;
     Aquarium           *aquarium;
     vector<Renderer *> renderQueue;
+    Camera*            outCamera;
+    int level = 0;
+    int spheresDelta = 8;
 };
 
 #endif //ARKANOID_GAMECONTROLLER_HPP

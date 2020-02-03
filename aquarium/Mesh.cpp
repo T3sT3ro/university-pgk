@@ -14,7 +14,7 @@
 using namespace std;
 
 
-Mesh::Mesh(GLenum usage, GLenum mode) : mode(mode), usage(usage) {}
+Mesh::Mesh(const char* path, GLenum usage, GLenum mode) : filePath(path), mode(mode), usage(usage) {}
 
 static regex faceVertexRegex(R"((\d+)\/?(\d+)?\/?(\d+)?)");
 
@@ -22,8 +22,8 @@ Mesh *Mesh::import(const char *objPath, GLenum usage, GLenum mode) {
     ifstream     objFile;
     stringstream objStream;
 
-    auto mesh = new Mesh(usage, mode);
-    objFile.exceptions(ifstream::failbit | ifstream::badbit);
+    auto mesh = new Mesh(objPath, usage, mode);
+    objFile.exceptions(ifstream::badbit);
     try {
         objFile.open(objPath);
         string line;
@@ -38,7 +38,7 @@ Mesh *Mesh::import(const char *objPath, GLenum usage, GLenum mode) {
 
         // init rawVertices, normals, uvs and faces
         int lineNO = 0;
-        while (!objFile.eof() && std::getline(objFile, line)) {
+        while (getline(objFile, line)) {
             ++lineNO;
             istringstream ss(line);
             string        what;
@@ -89,7 +89,7 @@ Mesh *Mesh::import(const char *objPath, GLenum usage, GLenum mode) {
                     }
                 }
             } else if(!line.empty()){
-                VERBOSE_LOW(cerr << "[Mesh] unrecognized line " << objPath <<  ":" << lineNO <<":\t'" << line << "'" << endl);
+                VERBOSE_HIGH(cerr << "[Mesh] unrecognized line " << objPath <<  ":" << lineNO <<":\t'" << line << "'" << endl);
             }
         }
         objFile.close();
@@ -109,7 +109,7 @@ Mesh *Mesh::import(const char *objPath, GLenum usage, GLenum mode) {
         return mesh;
 
     } catch (ifstream::failure &e) {
-        cerr << "[Mesh] error while loading obj file:\n" << e.what() << endl;
+        cerr << "[Mesh] error while loading obj file:\n" << e.what() << endl << strerror(errno) << endl;
         objFile.close();
         delete mesh;
         exit(0);
@@ -130,7 +130,7 @@ void Mesh::use(Shader *shader) {
                               sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, position)));
     } else {
         glDisableVertexAttribArray(vAttrib);
-        cerr << "[Mesh] missing attribute `" V_ATTRIB_NAME "` in shader " << shader->getName() << "(maybe optimized-out?)\n";
+        cerr << "[Mesh] " << filePath << " missing attribute `" V_ATTRIB_NAME "` in shader " << shader->getName() << "(maybe optimized-out?)\n";
     }
 
     if(hasUVs && vtAttrib != -1){
@@ -139,7 +139,7 @@ void Mesh::use(Shader *shader) {
                               sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, uv)));
     } else if(hasUVs) {
         glDisableVertexAttribArray(vtAttrib);
-        cerr << "[Mesh] missing attribute `" VT_ATTRIB_NAME "` in shader " << shader->getName() << "(maybe optimized-out?)\n";
+        cerr << "[Mesh] " << filePath << " missing attribute `" VT_ATTRIB_NAME "` in shader " << shader->getName() << "(maybe optimized-out?)\n";
     }
 
     if(hasNormals && vnAttrib != -1){
@@ -148,7 +148,7 @@ void Mesh::use(Shader *shader) {
                               sizeof(Vertex), reinterpret_cast<void *>(offsetof(Vertex, normal)));
     } else if(hasNormals) {
         glDisableVertexAttribArray(vnAttrib);
-        cerr << "[Mesh] missing attribute `" VN_ATTRIB_NAME "` in shader " << shader->getName() << "(maybe optimized-out?)\n";
+        cerr << "[Mesh] " << filePath << " missing attribute `" VN_ATTRIB_NAME "` in shader " << shader->getName() << "(maybe optimized-out?)\n";
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);

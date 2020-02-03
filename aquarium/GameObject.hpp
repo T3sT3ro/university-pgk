@@ -24,11 +24,13 @@ struct Transform3D {
 };
 
 
-
+class GameObject;
 
 struct SphereCollider {
-    vec3  position = {0, 0, 0};
+    GameObject  *object = nullptr;
     float radius   = 0;
+
+    SphereCollider(GameObject *object);
 
     bool operator*(const SphereCollider &other);
 
@@ -46,7 +48,6 @@ public:
     const GLuint   instance;
     Renderer       *renderer;
     Transform3D    transform; // pointer to transform so all transforms can be put inside one
-    SphereCollider collider;
     vec3           velocity; // normalised direction of motion
     float          speed; // scaling for velocity
 
