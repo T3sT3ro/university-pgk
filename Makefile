@@ -25,16 +25,26 @@ arkanoid: $(arkanoid_hc) $(arkanoid_cc)
 
 .PHONY: clean run arkanoid
 
-# arkanoid
+# aquarium
 aquarium_cc = $(wildcard aquarium/*.cpp)
 aquarium_hc = $(wildcard aquarium/*.hpp)
 
-
 aquarium: $(aquarium_hc) $(aquarium_cc)
-	$(CC) $(CCFLAGS) $< -o aquarium/$@.o $^ -lGLEW -lGL -lglfw -Iaquarium -I../common -g
+	$(CC) $(CCFLAGS) $< -o aquarium/$@.o $^ -lGLEW -lGL -lglfw -Iaquarium -g
 	chmod +x aquarium/$@.o
 
-.PHONY: clean run aquarium
+
+
+# terrain
+terrain_cc = $(wildcard terrain/*.cpp)
+terrain_hc = $(wildcard terrain/*.hpp)
+
+terrain: $(terrain_hc) $(terrain_cc)
+	$(CC) $(CCFLAGS) $< -o terrain/$@.o $^ -lGLEW -lGL -lglfw -Iterrain -g
+	chmod +x terrain/$@.o
+
+.PHONY: terrain
+
 
 run:
 	./run

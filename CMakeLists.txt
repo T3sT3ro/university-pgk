@@ -4,3 +4,4 @@ project(pgk)
 
 add_subdirectory(arkanoid)
 add_subdirectory(aquarium)
+add_subdirectory(terrain)
