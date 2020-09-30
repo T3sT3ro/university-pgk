@@ -1,3 +1,0 @@
-/home/tooster/workspace/university/pgk/aquarium/CMakeFiles/rebuild_cache.dir
-/home/tooster/workspace/university/pgk/aquarium/CMakeFiles/aquarium.dir
-/home/tooster/workspace/university/pgk/aquarium/CMakeFiles/edit_cache.dir

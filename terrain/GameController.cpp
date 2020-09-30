@@ -64,6 +64,8 @@ Earth::Earth(Renderer *renderer) : GameObject(renderer) {
     renderer->cullMode = GL_BACK;
     renderer->backfaceCulling = true;
     renderer->wireframe = true;
+
+    renderer->render(GameController::camera);
 }
 
 
@@ -71,9 +73,6 @@ GameController *GameController::instance;
 GLuint GameController::globalsUBO;
 Camera *GameController::camera;
 float GameController::timescale = 1.0;
-
-Mesh* UVsphere;
-Shader* earthShader;
 
 GameController::GameController(GLFWwindow *window) : window(window) {
     instance = this;
@@ -94,22 +93,18 @@ GameController::GameController(GLFWwindow *window) : window(window) {
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    outCamera = new Camera({aquariumRadius*2, aquariumRadius, 0}, normalize(vec3(-1,-.5,0)));
     Mesh* icosphere = Mesh::import("models/icosphere.obj");
-    UVsphere = Mesh::import("models/UVsphere.obj");
-    //    Mesh* suzanne = Mesh::import("models/suzanne.obj");
-    Mesh* box = Mesh::import("models/box.obj");
+    Mesh* UVsphere = Mesh::import("models/UVsphere.obj");
+    Shader* earthShader = Shader::create("shaders/earth.vert", "shaders/earth.frag");
 
-    player = new Player(Renderer::create(Shader::create("shaders/ball.vert", "shaders/ball.frag"), icosphere));
+    player = new Player();
     camera = player->camera;
 
 
-    bubbleShader = Shader::create("shaders/bubble.vert", "shaders/bubble.frag");
+    earth = new Earth(Renderer::create(earthShader, UVsphere));
+    earth->renderer->setModelMatrix(earth->transform.toModelMatrix());
 
-    aquarium = new Aquarium(Renderer::create(Shader::create("shaders/aquarium.vert", "shaders/aquarium.frag"), box));
-    aquarium->renderer->setModelMatrix(aquarium->transform.toModelMatrix());
-
-    renderQueue.push_back(aquarium->renderer);
+    renderQueue.push_back(earth->renderer);
     renderQueue.push_back(player->renderer);
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
@@ -119,61 +114,21 @@ GameController::GameController(GLFWwindow *window) : window(window) {
                 cerr << "Reloading...\n";
                 for(auto renderer : GameController::instance->renderQueue)
                     renderer->shader->reload();
-            } else {
-                GameController::instance->level=0;
-                GameController::instance->nextLevel();
-            }
-        }
-        if (key == GLFW_KEY_TAB && action == GLFW_PRESS){
-            swap(GameController::camera, GameController::instance->outCamera);
-            if(GameController::instance->player->camera == GameController::instance->camera){
-                GameController::instance->aquarium->renderer->shader->setUniformFloat("FAR", GameController::camera->far);
-                GameController::instance->bubbles[0]->renderer->shader->setUniformFloat("FAR", GameController::camera->far);
-            } else {
-                float INF = INFINITY;
-                GameController::instance->aquarium->renderer->shader->setUniformFloat("FAR", INF);
-                GameController::instance->bubbles[0]->renderer->shader->setUniformFloat("FAR", INF);
             }
         }
     });
-
-    renderQueue.push_back(nullptr); // placeholder
-    nextLevel();
 }
 
 void GameController::update(float dt) {
     dt *= timescale;
-
     glfwPollEvents();
-
     player->update(dt);
-    for (Bubble *bubble : bubbles) {
-        bubble->update(dt);
-        if (player->collider * bubble->collider){
-            cerr << "You Lost on level "<< level << " T-T press R to restart" << endl;
-            timescale = 0;
-        }
-    }
 }
 
 void GameController::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for(auto renderer:renderQueue)
         renderer->render(camera);
-}
-
-void GameController::nextLevel() {
-    ++level;
-    cerr << "LEVEL " << level << endl;
-    player->transform.translation = {0, 0, -aquariumRadius*2+4};
-
-    timescale = 1;
-    renderQueue.pop_back();
-    bubbles.clear();
-    auto bubbleRenderer = Renderer::create(bubbleShader, UVsphere, level*level*spheresDelta*spheresDelta);
-    bubbleRenderer->shader->setUniformFloat("FAR", GameController::camera->far);
-    for (int i = 0; i < level*level*spheresDelta*spheresDelta; ++i) bubbles.push_back(new Bubble(bubbleRenderer, i));
-    renderQueue.push_back(bubbleRenderer);
 }
 
 #endif //GAMECONTROLLER

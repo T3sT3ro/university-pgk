@@ -41,6 +41,7 @@
 
 #define CDBG cerr << "[DEBUG]: "
 #define CRITICAL(x) do{std::cerr<<(x)<<std::endl; exit(-1);}while(0)
+#define SMARTMOD(x, mod) ((x+mod)%mod)
 
 using namespace std;
 using namespace glm;

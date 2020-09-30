@@ -31,9 +31,9 @@ private:
 
 
 
-class Aquarium : public GameObject {
+class Earth : public GameObject {
 public:
-    explicit Aquarium(Renderer* renderer);
+    explicit Earth(Renderer* renderer);
 
     void update(float d) override;
 };
@@ -60,12 +60,9 @@ public:
 
 private:
     Player             *player;
-    vector<Bubble *>   bubbles;
-    Aquarium           *aquarium;
+    Earth              *earth;
     vector<Renderer *> renderQueue;
     Camera*            outCamera;
-    int level = 0;
-    int spheresDelta = 8;
 };
 
 #endif //ARKANOID_GAMECONTROLLER_HPP

@@ -29,6 +29,8 @@ arkanoid: $(arkanoid_hc) $(arkanoid_cc)
 aquarium_cc = $(wildcard aquarium/*.cpp)
 aquarium_hc = $(wildcard aquarium/*.hpp)
 
+.PHONY: aquarium
+
 aquarium: $(aquarium_hc) $(aquarium_cc)
 	$(CC) $(CCFLAGS) $< -o aquarium/$@.o $^ -lGLEW -lGL -lglfw -Iaquarium -g
 	chmod +x aquarium/$@.o

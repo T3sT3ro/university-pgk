@@ -14,17 +14,19 @@ using namespace glm;
 using namespace std;
 
 class Mesh{
+
+    bool hasUVs     = false;
+    bool hasNormals = false;
+
+
+protected:
     /** buffer holding interleaved vertices data*/
     GLuint VBO  = 0;
     /** index buffer for vertices */
     GLuint EBO  = 0;
 
-
-    bool hasUVs     = false;
-    bool hasNormals = false;
     const char* filePath;
 
-protected:
     Mesh(const char* path, GLenum usage, GLenum mode);
 
     struct Vertex{
@@ -51,7 +53,7 @@ public:
      * Locates attributes in shader, enables them if they exist and were read and binds the index and vertex buffers.
      * @param shader
      */
-    void use(Shader *shader);
+    virtual void use(Shader *shader);
 
     virtual ~Mesh();
 
