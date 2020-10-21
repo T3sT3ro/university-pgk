@@ -6,11 +6,9 @@
 #define PGK_COMPONENT_HPP
 
 
-
 class Component {
 
 };
-
 
 
 #endif //PGK_COMPONENT_HPP

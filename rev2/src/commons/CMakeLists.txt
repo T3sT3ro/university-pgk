@@ -1,9 +1,8 @@
 
-file(GLOB T3Commons_HPP third_party/stb_image.h *.hpp)
 
-file(GLOB T3Commons_CPP *.cpp)
+file(GLOB commons_HPP third_party/stb_image.h *.hpp)
+file(GLOB commons_CPP *.cpp)
 
-add_library(T3Commons STATIC ${T3Commons_CPP})
+add_library(commons STATIC ${commons_CPP})
 
-install(TARGETS T3Commons DESTINATION lib)
-install(FILES ${T3Commons_HPP} DESTINATION include)
+target_include_directories(commons PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

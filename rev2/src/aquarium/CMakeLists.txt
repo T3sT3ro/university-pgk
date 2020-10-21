@@ -1,9 +1,9 @@
+file(GLOB aquarium_HPP *.hpp)
+file(GLOB aquarium_CPP *.cpp)
 
+add_executable(aquarium ${aquarium_CPP})
 
-file(GLOB AGL3_HPP *.hpp)
-file(GLOB AGL3_CPP *.cpp)
+link_libraries(commons)
+include_directories(${PROJECT_SOURCE_DIR}/src/commons)
 
-add_executable(AGL3-example ${AGL3_CPP})
-
-target_include_directories(AGL3-example PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(AGL3-example epoxy)
+target_include_directories(aquarium PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
