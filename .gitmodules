@@ -1,0 +1,3 @@
+[submodule "rev2/src/main/third_party/imgui"]
+	path = rev2/src/main/third_party/imgui
+	url = git@github.com:ocornut/imgui.git
