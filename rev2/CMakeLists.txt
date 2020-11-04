@@ -37,6 +37,8 @@ add_subdirectory(src/aquarium)
 
 add_subdirectory(src/z2)
 
+add_subdirectory(src/segmentsGame)
+
 set_target_properties(aquarium commons PROPERTIES EXCLUDE_FROM_ALL true)
 
 # adds compilation definitions
