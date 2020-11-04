@@ -14,30 +14,31 @@ struct SegmentData {
 };
 
 class SegmentInstancedRenderer : public AGLDrawable {
-    float segmentLength;
+    float extendLength;
 
 public :
 
-    std::vector<SegmentData> segments;
-    int                      instances = 0;
+    std::vector<SegmentData> instances;
+    int                      instancesCnt = 0;
 
     SegmentInstancedRenderer(int segmentCnt) : AGLDrawable(0) {
-        segments.resize(segmentCnt);
-        instances = segmentCnt;
+        instances.resize(segmentCnt);
+        instancesCnt = segmentCnt;
         setShaders();
         setBuffers();
     }
 
-    void setSegmentLength(float length) {
-        segmentLength = length;
+    void setExtentLength(float length) {
+        extendLength = length;
         setShaders();
-        glUniform1f(0, segmentLength);
+        glUniform1f(0, extendLength);
     }
+
+    float getSegmentLength() const { return extendLength; }
 
     void setSegmentData(int segment, const SegmentData &data) {
         bindBuffers();
-        segments[segment] = data;
-        printf("%.2f %.2f\n", data.center.x, data.center.y);
+        instances[segment] = data;
         glBufferSubData(GL_ARRAY_BUFFER, sizeof(SegmentData) * segment, sizeof(SegmentData), &data);
     }
 
@@ -47,7 +48,7 @@ public :
 
     void setBuffers() {
         bindBuffers();
-        glBufferData(GL_ARRAY_BUFFER, sizeof(SegmentData) * instances, segments.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(SegmentData) * instancesCnt, instances.data(), GL_STATIC_DRAW);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(SegmentData), (void *) offsetof(SegmentData, center));
         glVertexAttribDivisor(0, 1);
@@ -60,7 +61,7 @@ public :
     void draw() {
         bindProgram();
         bindBuffers();
-        glDrawArraysInstanced(GL_LINES, 0, 2, instances);
+        glDrawArraysInstanced(GL_LINES, 0, 2, instancesCnt);
     }
 
 };
@@ -78,6 +79,8 @@ public:
     virtual void KeyCB(int key, int scancode, int action, int mods);
 
     void MainLoop(int seed, int n);
+
+    void Resize(int _wd, int _ht) override;
 };
 
 
@@ -98,7 +101,7 @@ void MyWin::MainLoop(int seed, int n) {
     glLineWidth(2.0f);
 
     SegmentInstancedRenderer segments(n * n);
-    segments.setSegmentLength(1.0f/(float) n);
+    segments.setExtentLength(1.0f / (float) n); // 1 = 2/2 - viewport size in NDC is 2x2
 
     srand(seed);
 
@@ -107,19 +110,28 @@ void MyWin::MainLoop(int seed, int n) {
         for (int j = 0; j < n; j++) {
             segments.setSegmentData(i * n + j, {
                     glm::vec2(
-                            glm::mix(-1.0f, 1.0f, (float) i / (float) (n-1)),
-                            glm::mix(-1.0f, 1.0f, (float) j / (float) (n-1))
+                            glm::mix(-.9f, .9f, (float) i / (float) (n - 1)),
+                            glm::mix(-.9f, .9f, (float) j / (float) (n - 1))
                     ),
-                    ((float) rand() / (float) RAND_MAX) * 360.0f
+                    ((float) rand() / (float) RAND_MAX) * 360.0f,
             });
         }
     }
+    // rotate player 45 degrees from OX
+
     segments.setSegmentData(0, {
-        segments.segments[0].center,
-        3.14/4.0
+            segments.instances[0].center,
+            M_PI / 4.0,
     });
 
+    bool hasWon = false;
+
+    double timerStart = glfwGetTime();
+    double currentFrame = glfwGetTime();
     do {
+        double deltaTime = glfwGetTime() - currentFrame;
+        currentFrame = glfwGetTime();
+
         glClear(GL_COLOR_BUFFER_BIT);
 
         AGLErrors("main-loopbegin");
@@ -132,31 +144,61 @@ void MyWin::MainLoop(int seed, int n) {
         //glfwWaitEvents();
 
         // =====================================================    Move player
-        auto        currentPlayerParams = segments.segments[0];
-        SegmentData newPlayerParams;
+        auto currentPlayerParams  = segments.instances[0];
 
         glm::vec2 direction(cos(currentPlayerParams.rotation), sin(currentPlayerParams.rotation));
-        float     motionMagnitude       = 0.0f;
-        if (glfwGetKey(win(), GLFW_KEY_UP) == GLFW_PRESS) motionMagnitude += 0.01f;
-        if (glfwGetKey(win(), GLFW_KEY_DOWN) == GLFW_PRESS) motionMagnitude -= 0.01f;
+        float     motionMagnitude = 0.0f;
+        if (glfwGetKey(win(), GLFW_KEY_UP) == GLFW_PRESS) motionMagnitude += 1.0f;
+        if (glfwGetKey(win(), GLFW_KEY_DOWN) == GLFW_PRESS) motionMagnitude -= 1.0f;
 
         float rotationMagnitude = 0.0f;
-        if (glfwGetKey(win(), GLFW_KEY_LEFT) == GLFW_PRESS) rotationMagnitude += 0.05f;
-        if (glfwGetKey(win(), GLFW_KEY_RIGHT) == GLFW_PRESS) rotationMagnitude -= 0.05f;
+        if (glfwGetKey(win(), GLFW_KEY_LEFT) == GLFW_PRESS) rotationMagnitude += 1.0f;
+        if (glfwGetKey(win(), GLFW_KEY_RIGHT) == GLFW_PRESS) rotationMagnitude -= 1.0f;
 
 
-        // collision check
-        newPlayerParams.center   = currentPlayerParams.center + direction * motionMagnitude;
-        newPlayerParams.rotation = currentPlayerParams.rotation + rotationMagnitude;
-        segments.setSegmentData(0, newPlayerParams);
+        // =====================================================    Collision check
+        SegmentData newPlayerParams = {
+                glm::clamp(currentPlayerParams.center + direction * motionMagnitude * (float) deltaTime * .5f,
+                           glm::vec2(-0.9, -0.9),
+                           glm::vec2(0.9, 0.9)),
+                currentPlayerParams.rotation + rotationMagnitude * (float) deltaTime * 2.0f,
+        };
+
+        int other = n * n;
+        while (--other) { // check collision from last to 0 (excluding 0)
+            auto  playerExtent = glm::vec2(cos(newPlayerParams.rotation), sin(newPlayerParams.rotation));
+            auto  otherExtent  = glm::vec2(cos(segments.instances[other].rotation), sin(segments.instances[other].rotation));
+            float extentLength = segments.getSegmentLength();
+
+            if (intersectSegmentSegment(
+                    newPlayerParams.center + playerExtent * extentLength,
+                    newPlayerParams.center - playerExtent * extentLength,
+                    segments.instances[other].center + otherExtent * extentLength,
+                    segments.instances[other].center - otherExtent * extentLength))
+                break;
+        }
+
+        if (other == n * n - 1) { // collided with top last
+            printf("Completed in %f\n", glfwGetTime() - timerStart);
+            hasWon = true;
+        } else if (other == 0) { // move if not colliding
+            segments.setSegmentData(0, newPlayerParams);
+        }
 
 
     } while (
 
             glfwGetKey(win(), GLFW_KEY_ESCAPE) != GLFW_PRESS
             && glfwWindowShouldClose(win()) == 0
-        // collided with last
+            && !hasWon
             );
+}
+
+void MyWin::Resize(int _wd, int _ht) {
+    AGLWindow::Resize(_wd, _ht);
+
+    float edge = std::min(_wd, _ht);
+    ViewportOne((_wd - edge)/2, (_ht - edge)/2, edge, edge);
 }
 
 int main(int argc, char *argv[]) {

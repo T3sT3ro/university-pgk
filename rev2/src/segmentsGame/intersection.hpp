@@ -25,11 +25,11 @@ bool onSegment(const glm::vec2 &p, const glm::vec2 &q, const glm::vec2 &r) {
 // 1 --> Clockwise
 // 2 --> Counterclockwise
 int orientation(const glm::vec2 &p, const glm::vec2 &q, const glm::vec2 &r) {
-    float cross = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+    float prod = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
 
-    if (std::abs(cross) < 1e-4) return 0;
+    if (std::abs(prod) < 1e-4) return 0;
 
-    return (cross > 0) ? 1 : 2;
+    return (prod > 0) ? 1 : 2;
 }
 
 /// returns true if segment (a1, a2) and (b1, b2) intersect (+- epsilon)
