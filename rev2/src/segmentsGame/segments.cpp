@@ -8,11 +8,13 @@
 #include <glm/glm.hpp>
 #include <intersection.hpp>
 
+// segment instance data
 struct SegmentData {
     glm::vec2 center;
     float     rotation;
 };
 
+// renderer for segments instances
 class SegmentInstancedRenderer : public AGLDrawable {
     float extendLength;
 
@@ -66,10 +68,28 @@ public :
 
 };
 
+class Background : public AGLDrawable {
+public:
+    Background() : AGLDrawable(0) {
+        setShaders();
+    }
+
+    void setShaders() {
+        compileShadersFromFile("shaders/background.vert", "shaders/background.frag");;
+    }
+
+    void draw() {
+        bindProgram();
+        glUniform1f(0, glfwGetTime());  // center in vertex shader
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    }
+};
+
 // ==========================================================================
 // Window Main Loop Inits ...................................................
 // ==========================================================================
 class MyWin : public AGLWindow {
+    float vedge;
 public:
     MyWin() {};
 
@@ -97,10 +117,13 @@ void MyWin::KeyCB(int key, int scancode, int action, int mods) {
 // ==========================================================================
 void MyWin::MainLoop(int seed, int n) {
     ViewportOne(0, 0, wd, ht);
+    vedge = glm::min(wd, ht);
 
     glLineWidth(2.0f);
 
     SegmentInstancedRenderer segments(n * n);
+    Background               background;
+
     segments.setExtentLength(1.0f / (float) n); // 1 = 2/2 - viewport size in NDC is 2x2
 
     srand(seed);
@@ -126,16 +149,17 @@ void MyWin::MainLoop(int seed, int n) {
 
     bool hasWon = false;
 
-    double timerStart = glfwGetTime();
-    double currentFrame = glfwGetTime();
+    double previousTime = glfwGetTime();
+    double currentTime  = glfwGetTime();
     do {
-        double deltaTime = glfwGetTime() - currentFrame;
-        currentFrame = glfwGetTime();
+        double deltaTime = glfwGetTime() - currentTime;
+        currentTime = glfwGetTime();
 
         glClear(GL_COLOR_BUFFER_BIT);
 
         AGLErrors("main-loopbegin");
         // =====================================================    Drawing
+        background.draw();
         segments.draw();
         AGLErrors("main-afterdraw");
 
@@ -178,11 +202,24 @@ void MyWin::MainLoop(int seed, int n) {
                 break;
         }
 
-        if (other == n * n - 1) { // collided with top last
-            printf("Completed in %f\n", glfwGetTime() - timerStart);
+        if (other == n * n - 1) // collided with top last
             hasWon = true;
-        } else if (other == 0) { // move if not colliding
+        else if (other == 0)    // move if not colliding
             segments.setSegmentData(0, newPlayerParams);
+
+        if (hasWon) {
+            static float       completeTime = currentTime;
+            static const float animTime     = 2.0f;
+            // animate endgame
+            float              animProgress = (float) (currentTime - completeTime) / animTime;
+            if (animProgress >= 1.0) {
+                printf("Completed in %f\n", completeTime);
+                return;
+            } else {
+                static float startVedge = vedge;
+                float newVedge = glm::mix(startVedge, 0.0f, animProgress);
+                ViewportOne((wd - newVedge) / 2.0f, (ht - newVedge) / 2.0f, newVedge, newVedge);
+            }
         }
 
 
@@ -190,15 +227,15 @@ void MyWin::MainLoop(int seed, int n) {
 
             glfwGetKey(win(), GLFW_KEY_ESCAPE) != GLFW_PRESS
             && glfwWindowShouldClose(win()) == 0
-            && !hasWon
+//            && !hasWon
             );
 }
 
 void MyWin::Resize(int _wd, int _ht) {
     AGLWindow::Resize(_wd, _ht);
 
-    float edge = std::min(_wd, _ht);
-    ViewportOne((_wd - edge)/2, (_ht - edge)/2, edge, edge);
+    vedge = std::min(_wd, _ht);
+    ViewportOne((_wd - vedge) / 2, (_ht - vedge) / 2, vedge, vedge);
 }
 
 int main(int argc, char *argv[]) {

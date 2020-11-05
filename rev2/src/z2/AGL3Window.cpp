@@ -50,7 +50,7 @@ void AGLWindow::GetCursorNDC(float *x, float *y) {
 void AGLWindow::Resize( int _wd, int _ht ) {
    wd    = _wd;
    ht    = _ht;
-   aspect= float(ht)/float(wd);
+   aspect= float(wd)/float(ht);
    ViewportOne(0, 0, (GLsizei) wd, (GLsizei) ht);
 }
 
