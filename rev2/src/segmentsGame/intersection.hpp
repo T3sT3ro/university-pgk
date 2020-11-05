@@ -3,8 +3,8 @@
 // Source from https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
 //
 
-#ifndef PGK_INTERSECTION_HPP
-#define PGK_INTERSECTION_HPP
+#ifndef PGK_INTERSECTION_CPP
+#define PGK_INTERSECTION_CPP
 
 #include <glm/glm.hpp>
 #include <algorithm>
@@ -52,4 +52,4 @@ bool intersectSegmentSegment(const glm::vec2 &a1, const glm::vec2 &a2, const glm
     return false;
 }
 
-#endif //PGK_INTERSECTION_HPP
+#endif //PGK_INTERSECTION_CPP
